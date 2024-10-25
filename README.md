@@ -15,6 +15,11 @@ TODO
 
 TODO: other parts of the source
 
+# Contributing
+TODO: you can help by adding your own dialects
+- please open PR
+- the ususal: `cargo fmt` etc.
+
 # License
 This project is licensed under MIT-0 (MIT No Attribution).
 By contributing to this repositry, you agree that your code will be licensed as MIT-0.
