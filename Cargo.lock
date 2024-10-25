@@ -5,3 +5,11 @@ version = 3
 [[package]]
 name = "critic"
 version = "0.1.0"
+dependencies = [
+ "critic-core",
+]
+
+[[package]]
+name = "critic-core"
+version = "0.1.0"
+source = "git+https://github.com/curatorsigma/critic-core.git#f3c61d319210d2a6c441b61730edf928e0c6ba3b"

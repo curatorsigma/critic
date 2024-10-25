@@ -2,5 +2,18 @@
 name = "critic"
 version = "0.1.0"
 edition = "2021"
+authors = ["Jonathan Schleucher"]
+
+[features]
+default = []
+
+full = ["atg_all", "anchor_all"]
+
+atg_all = ["atg_example"]
+atg_example = []
+
+anchor_all = ["anchor_example"]
+anchor_example = []
 
 [dependencies]
+critic-core = { git = "https://github.com/curatorsigma/critic-core.git" }
