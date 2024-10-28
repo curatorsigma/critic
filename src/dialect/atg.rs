@@ -2,3 +2,5 @@
 
 #[cfg(feature = "atg_example")]
 mod example;
+#[cfg(feature = "atg_example")]
+pub use example::ExampleAtgDialect;

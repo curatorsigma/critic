@@ -5,15 +5,23 @@ edition = "2021"
 authors = ["Jonathan Schleucher"]
 
 [features]
-default = []
+default = ["atg_example", "anchor_example"]
 
 full = ["atg_all", "anchor_all"]
 
+# All the ATG dialects available for transcription.
+#
+# At most one ATG dialect should be defined per combination of writing system + language.
+# Each ATG dialect should have a language of the same name which is naturally associated to it.
 atg_all = ["atg_example"]
 atg_example = []
 
+# All the anchor styles available for works to use.
+# They are actually compiled in critic-core, so we have to simply redirect the dependency there.
 anchor_all = ["anchor_example"]
-anchor_example = []
+anchor_example = ["critic-core/anchor_example"]
 
 [dependencies]
 critic-core = { git = "https://github.com/curatorsigma/critic-core.git" }
+serde = { version = "1.0.213", features = ["derive"] }
+toml = "0.8.19"

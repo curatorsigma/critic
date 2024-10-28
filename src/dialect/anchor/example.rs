@@ -1,7 +1,7 @@
 //! An example anchor dialect.
 use core::str::FromStr;
 
-use critic_core::anchor::AnchorDialect;
+use critic_core::anchor::SuperAnchorDialect;
 
 #[derive(Debug, PartialEq)]
 enum ParseStanzaError {
@@ -56,6 +56,6 @@ impl FromStr for Stanza {
         }
     }
 }
-impl AnchorDialect for Stanza {
+impl SuperAnchorDialect for Stanza {
     type ParseError = ParseStanzaError;
 }

@@ -78,6 +78,6 @@ impl FromStr for Stanza {
         }
     }
 }
-impl AnchorDialect for Stanza {
+impl SuperAnchorDialect for Stanza {
     type ParseError = ParseStanzaError;
 }

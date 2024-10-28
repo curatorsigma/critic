@@ -15,7 +15,7 @@ const EXAMPLE_CONTROL_POINTS: ControlPointDefinition = ControlPointDefinition {
 };
 
 #[allow(dead_code)]
-struct ExampleAtgDialect {}
+pub struct ExampleAtgDialect {}
 impl AtgDialect for ExampleAtgDialect {
     const NATIVE_POINTS: &'static str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.'";
     const ATG_CONTROL_POINTS: ControlPointDefinition = EXAMPLE_CONTROL_POINTS;
