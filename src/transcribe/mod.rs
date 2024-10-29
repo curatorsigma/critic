@@ -22,7 +22,7 @@ impl FolioTranscriptMetadata {
 }
 
 /// A transcript of a single folio.
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct FolioTranscript
 {
     metadata: FolioTranscriptMetadata,
@@ -38,14 +38,14 @@ impl FolioTranscript
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct AtgBlock
 {
     text: Text,
-    language: Box<dyn Language>,
+    language: Language,
 }
 impl AtgBlock {
-    pub fn new(text: Text, language: Box<dyn Language>) -> Self {
+    pub fn new(text: Text, language: Language) -> Self {
         Self {
             text,
             language,

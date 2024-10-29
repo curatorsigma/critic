@@ -151,9 +151,8 @@ impl FromStr for FolioTranscript
                     });
                 };
                 let trans_block: TranscriptBlock = value.try_into()?;
-                dbg!(&trans_block);
                 let language_name = &trans_block.language.unwrap_or(trans_block.atg.clone());
-                let language = crate::language::select(language_name)
+                let language = crate::language::Language::from_name(language_name)
                     .ok_or(FolioTranscriptParseError { location: None, reason: FolioTranscriptParseErrorReason::LanguageUnknown(language_name.to_owned())})?;
                 let anchor_dialect = critic_core::anchor::AnchorDialect::get_by_name(&trans_block.anchor).ok_or(
                     FolioTranscriptParseError {
@@ -190,7 +189,9 @@ impl FromStr for FolioTranscript
 
 #[cfg(test)]
 mod test {
-    use crate::transcribe::{FolioTranscript, FolioTranscriptMetadata};
+    use critic_core::atg::Text;
+
+    use crate::{dialect::atg::ExampleAtgDialect, transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata}};
 
     #[test]
     fn folio_parse() {
@@ -214,7 +215,11 @@ some other t^(2)(ra)nscript
 '''
 "#;
         let res = input.parse::<FolioTranscript>().unwrap();
-        // TODO: check that the data is correct - problem: AtgBlock can never be PartialEq, so this
-        // is very very annoying
+        let metadata = FolioTranscriptMetadata::new("John Doe".to_owned(), vec!["Alice".to_owned(), "Bob".to_owned()]);
+        let dialect_blocks = vec![
+            AtgBlock::new(Text::parse::<ExampleAtgDialect>("this is §(1) my transcript", critic_core::anchor::AnchorDialect::Example).unwrap(), crate::language::Language::Example),
+            AtgBlock::new(Text::parse::<ExampleAtgDialect>("some other t^(2)(ra)nscript", critic_core::anchor::AnchorDialect::Example).unwrap(), crate::language::Language::Example),
+        ];
+        assert_eq!(res, FolioTranscript::new(metadata, dialect_blocks));
     }
 }
