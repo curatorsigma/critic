@@ -194,6 +194,7 @@ mod test {
     use crate::{dialect::atg::ExampleAtgDialect, transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata}};
 
     #[test]
+    #[cfg(all(feature = "language_example", feature = "anchor_example", feature = "atg_example"))]
     fn folio_parse() {
         let input = r#"
 [metadata]

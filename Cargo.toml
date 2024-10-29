@@ -5,7 +5,7 @@ edition = "2021"
 authors = ["Jonathan Schleucher"]
 
 [features]
-default = ["atg_example", "anchor_example"]
+default = ["atg_example", "anchor_example", "language_example"]
 
 full = ["atg_all", "anchor_all"]
 
@@ -20,6 +20,9 @@ atg_example = []
 # They are actually compiled in critic-core, so we have to simply redirect the dependency there.
 anchor_all = ["anchor_example"]
 anchor_example = ["critic-core/anchor_example"]
+
+language_all = ["language_example"]
+language_example = []
 
 [dependencies]
 critic-core = { git = "https://github.com/curatorsigma/critic-core.git" }
