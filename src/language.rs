@@ -1,11 +1,12 @@
 //! Everything to do with defining natural languages
 
 use critic_core::atg::Word;
+use serde::Deserialize;
 
 mod example;
 
 /// A natural language which has an associated lexeme- and morphological system.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Language {
     /// Example Language
     #[cfg(feature = "language_example")]

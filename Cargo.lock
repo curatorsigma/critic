@@ -14,7 +14,10 @@ dependencies = [
 [[package]]
 name = "critic-core"
 version = "0.1.0"
-source = "git+https://github.com/curatorsigma/critic-core.git#7b961d6cca98abc34333c82e334dee0ea7b4a174"
+source = "git+https://github.com/curatorsigma/critic-core.git#ca408317f95f4db99fdc7c1b869963dec5e37ab0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "equivalent"

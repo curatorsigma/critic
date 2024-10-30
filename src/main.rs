@@ -7,4 +7,5 @@ mod transcribe;
 mod normalise;
 mod lex;
 
-fn main() {}
+fn main() {
+}
