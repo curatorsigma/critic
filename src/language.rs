@@ -15,7 +15,7 @@ pub enum Language {
 
 impl Language {
     /// Select the correct Language, given its name
-    pub fn from_name(s: &str)-> Option<Self> {
+    pub fn from_name(s: &str) -> Option<Self> {
         match s {
             #[cfg(feature = "language_example")]
             "example" => Some(Language::Example),
@@ -26,9 +26,11 @@ impl Language {
     /// Do the normalisation steps which depend on the language
     pub fn normalise(&self, text: Vec<(Word, String)>) -> Vec<WordNormalForm> {
         match self {
-            Self::Example => {
-                crate::language::example::normalise(text)
-            }
+            #[cfg(feature = "language_example")]
+            Self::Example => crate::language::example::normalise(text),
+            // this happens only if Language is empty (no language feature enabled)
+            // but in this case, Language is the bottom type anyways
+            _ => unreachable!(),
         }
     }
 }
@@ -48,7 +50,9 @@ pub struct WordNormalForm {
 impl WordNormalForm {
     pub fn new(annotated_form: Word, display_form: String, compare_form: Option<String>) -> Self {
         Self {
-            annotated_form, display_form, compare_form,
+            annotated_form,
+            display_form,
+            compare_form,
         }
     }
 

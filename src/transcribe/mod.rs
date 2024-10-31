@@ -1,11 +1,16 @@
 //! Everything directly concerning transcription of Manuscripts.
 
-use std::{collections::HashMap, fs::{read_to_string, File}, path::Path, thread::current};
-
-use critic_core::{anchor::AnchorDialect, atg::{AtgParseError, Text}};
+use critic_core::{
+    anchor::AnchorDialect,
+    atg::{AtgParseError, Text},
+};
 use serde::Deserialize;
 
-use crate::{dialect::parse_by_dialect_name, io::file::{read_witness_metadata, ReadWitnessDefinitionError, TranscriptIterator}, language::Language};
+use crate::{
+    dialect::{parse_by_dialect, AtgDialectList, AtgDialectUnknown},
+    io::file::{read_witness_metadata, ReadWitnessDefinitionError, TranscriptIterator},
+    language::Language,
+};
 
 /// Metadata associated to a single folio.
 #[derive(Deserialize, Debug, PartialEq, Eq)]
@@ -16,13 +21,13 @@ pub struct FolioTranscriptMetadata {
     editors: Vec<String>,
 }
 impl FolioTranscriptMetadata {
-    pub fn new(transcriber: String, editors: Vec<String>) -> Self  {
+    pub fn new(transcriber: String, editors: Vec<String>) -> Self {
         Self {
-            transcriber, editors,
+            transcriber,
+            editors,
         }
     }
 }
-
 
 #[derive(Debug)]
 pub struct FolioTranscriptParseError {
@@ -34,11 +39,7 @@ impl core::fmt::Display for FolioTranscriptParseError {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         match self.location {
             None => {
-                write!(
-                    f,
-                    "Error parsing folio transcript: {}.",
-                    self.reason
-                )
+                write!(f, "Error parsing folio transcript: {}.", self.reason)
             }
             Some(x) => {
                 write!(
@@ -59,6 +60,16 @@ impl From<toml::de::Error> for FolioTranscriptParseError {
         }
     }
 }
+impl From<AtgDialectUnknown> for FolioTranscriptParseError {
+    fn from(value: AtgDialectUnknown) -> Self {
+        FolioTranscriptParseError {
+            location: None,
+            reason: FolioTranscriptParseErrorReason::AtgDialectUnknown(value.name)
+        }
+    }
+}
+
+
 /// The reasons for which Folio parsing can fail.
 #[derive(Debug)]
 enum FolioTranscriptParseErrorReason {
@@ -100,8 +111,14 @@ impl core::fmt::Display for FolioTranscriptParseErrorReason {
             Self::NoMetadata => {
                 write!(f, "The file did not contain a \"metadata\" block.")
             }
-            Self::NoAtg => write!(f, "No ATG dialect was set either on the witness or on the folio."),
-            Self::NoAnchor => write!(f, "No anchor style was set either on the witness or on the folio."),
+            Self::NoAtg => write!(
+                f,
+                "No ATG dialect was set either on the witness or on the folio."
+            ),
+            Self::NoAnchor => write!(
+                f,
+                "No anchor style was set either on the witness or on the folio."
+            ),
             Self::BlockNameNotDecimal(name) => {
                 write!(f, "The blockname {name} must be a decimal.")
             }
@@ -123,7 +140,6 @@ impl core::fmt::Display for FolioTranscriptParseErrorReason {
         }
     }
 }
-
 /// A single block in a transcript file
 ///
 /// This struct is used during parsing only.
@@ -149,63 +165,67 @@ struct TranscriptBlock {
     transcript: String,
 }
 impl TranscriptBlock {
-    fn select_dialects(&self, meta: &WitnessMetadata) -> Result<(String, Language, AnchorDialect), FolioTranscriptParseError> {
+    fn select_dialects(
+        &self,
+        meta: &WitnessMetadata,
+    ) -> Result<(String, Language, AnchorDialect), FolioTranscriptParseError> {
         let atg = match &self.atg {
-            None => {
-                match &meta.default_atg {
-                    Some(x) => x,
-                    None => { return Err(FolioTranscriptParseError {
-                        location: None, reason: FolioTranscriptParseErrorReason::NoAtg
-                    }); }
+            None => match &meta.default_atg {
+                Some(x) => x,
+                None => {
+                    return Err(FolioTranscriptParseError {
+                        location: None,
+                        reason: FolioTranscriptParseErrorReason::NoAtg,
+                    });
                 }
-            }
-            Some(x) => { x }
+            },
+            Some(x) => x,
         };
         let language = match &self.language {
-            None => {
-                match &meta.default_language {
-                    Some(x) => x,
-                    None => { atg }
-                }
-            }
-            Some(x) => {x}
+            None => match &meta.default_language {
+                Some(x) => x,
+                None => atg,
+            },
+            Some(x) => x,
         };
-        let language = crate::language::Language::from_name(language)
-            .ok_or(FolioTranscriptParseError { location: None, reason: FolioTranscriptParseErrorReason::LanguageUnknown(language.to_owned())})?;
+        let language =
+            crate::language::Language::from_name(language).ok_or(FolioTranscriptParseError {
+                location: None,
+                reason: FolioTranscriptParseErrorReason::LanguageUnknown(language.to_owned()),
+            })?;
 
         let anchor = match &self.anchor {
-            None => {
-                match &meta.default_anchor {
-                    Some(x) => x,
-                    None => { return Err(FolioTranscriptParseError {
-                        location: None, reason: FolioTranscriptParseErrorReason::NoAnchor
-                    }); }
+            None => match &meta.default_anchor {
+                Some(x) => x,
+                None => {
+                    return Err(FolioTranscriptParseError {
+                        location: None,
+                        reason: FolioTranscriptParseErrorReason::NoAnchor,
+                    });
                 }
-            }
-            Some(x) => {x}
+            },
+            Some(x) => x,
         };
         let anchor_dialect = critic_core::anchor::AnchorDialect::get_by_name(anchor).ok_or(
             FolioTranscriptParseError {
                 location: None,
                 reason: FolioTranscriptParseErrorReason::AnchorDialectUnknown(anchor.to_owned()),
-            })?;
+            },
+        )?;
         Ok((atg.to_owned(), language, anchor_dialect))
     }
 }
 
-
 /// A transcript of a single folio.
 // TODO: docs
 #[derive(Deserialize, Debug, PartialEq, Eq)]
-pub struct FolioTranscript
-{
+pub struct FolioTranscript {
     metadata: FolioTranscriptMetadata,
     // TODO: rename this to blocks
     // TODO: remove this pub??
     pub dialect_blocks: Vec<AtgBlock>,
 }
-impl FolioTranscript
-{
+impl FolioTranscript {
     pub fn new(metadata: FolioTranscriptMetadata, dialect_blocks: Vec<AtgBlock>) -> Self {
         Self {
             metadata,
@@ -213,7 +233,10 @@ impl FolioTranscript
         }
     }
 
-    pub fn from_folio_file_content(s: &str, witness_metadata: &WitnessMetadata) -> Result<Self, FolioTranscriptParseError> {
+    pub fn from_folio_file_content(
+        s: &str,
+        witness_metadata: &WitnessMetadata,
+    ) -> Result<Self, FolioTranscriptParseError> {
         // interpret s as toml object
         let as_toml: toml::Table = toml::from_str(s)?;
         // parse table entry by table entry
@@ -238,26 +261,31 @@ impl FolioTranscript
                     });
                 };
                 let trans_block: TranscriptBlock = value.try_into()?;
-                let (atg, language, anchor_dialect) = trans_block.select_dialects(&witness_metadata)?;
+                let (atg, language, anchor_dialect) =
+                    trans_block.select_dialects(&witness_metadata)?;
+                let atg_dialect =
+                    atg.parse::<AtgDialectList>()
+                        .map_err(|AtgDialectUnknown { name: x }| FolioTranscriptParseError {
+                            location: None,
+                            reason: FolioTranscriptParseErrorReason::AtgDialectUnknown(x),
+                        })?;
 
-                let text = match parse_by_dialect_name(&trans_block.transcript, &atg, anchor_dialect) {
-                    None => {
-                        return Err(FolioTranscriptParseError {
-                            location: None,
-                            reason: FolioTranscriptParseErrorReason::AtgDialectUnknown(atg),
-                        });
-                    }
-                    Some(Err(parse_error)) => {
-                        return Err(FolioTranscriptParseError {
-                            location: None,
-                            reason: FolioTranscriptParseErrorReason::TranscriptUnparsable(key, parse_error),
-                        });
-                    }
-                    Some(Ok(x)) => { x }
-                };
-                dialect_blocks.push(AtgBlock::new(text, language, atg));
+                let text =
+                    match parse_by_dialect(&trans_block.transcript, &atg_dialect, anchor_dialect) {
+                        Err(parse_error) => {
+                            return Err(FolioTranscriptParseError {
+                                location: None,
+                                reason: FolioTranscriptParseErrorReason::TranscriptUnparsable(
+                                    key,
+                                    parse_error,
+                                ),
+                            });
+                        }
+                        Ok(x) => x,
+                    };
+                dialect_blocks.push(AtgBlock::new(text, language, atg_dialect));
             };
-        };
+        }
         Ok(FolioTranscript::new(
             metadata.ok_or(FolioTranscriptParseError {
                 location: None,
@@ -269,19 +297,33 @@ impl FolioTranscript
 }
 
 #[derive(Deserialize, Debug, PartialEq, Eq)]
-pub struct AtgBlock
-{
+pub struct AtgBlock {
     text: Text,
     language: Language,
-    atg_dialect: String,
+    atg_dialect: AtgDialectList,
 }
 impl AtgBlock {
-    pub fn new(text: Text, language: Language, atg_dialect: String) -> Self {
+    pub fn new(text: Text, language: Language, atg_dialect: AtgDialectList) -> Self {
+        // make sure the atg dialect exists
         Self {
             text,
             language,
             atg_dialect,
         }
+    }
+
+    pub fn from_dialect_name(
+        text: Text,
+        language: Language,
+        atg_dialect: String,
+    ) -> Result<Self, AtgDialectUnknown> {
+        // make sure the atg dialect exists
+        let dialect = atg_dialect.parse()?;
+        Ok(Self {
+            text,
+            language,
+            atg_dialect: dialect,
+        })
     }
 }
 
@@ -313,7 +355,10 @@ impl Witness {
         self.metadata.folios.iter()
     }
 
-    pub fn get_folios<'a, 'b>(&'a self, base_dir: &'b std::path::Path) -> TranscriptIterator<'a, 'b> {
+    pub fn get_folios<'a, 'b>(
+        &'a self,
+        base_dir: &'b std::path::Path,
+    ) -> TranscriptIterator<'a, 'b> {
         // return the correct iterator here
         TranscriptIterator::new(&self.metadata, base_dir)
     }

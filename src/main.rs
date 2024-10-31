@@ -7,13 +7,15 @@ mod language;
 
 pub mod io;
 
-mod transcribe;
-mod normalise;
 mod lex;
+mod normalise;
+mod transcribe;
 
 fn main() {
     let wit = Witness::from_path(Path::new(".data/witness.toml")).unwrap();
-    let mut folios = wit.get_folios(Path::new(".data/ExampleWitness/")).collect::<Vec<_>>();
+    let mut folios = wit
+        .get_folios(Path::new(".data/ExampleWitness/"))
+        .collect::<Vec<_>>();
     dbg!(&folios);
     // TODO: write a function to concat multiple folios into a vec of text + language
     // TODO: then write a function to take one text + language into the lex format output

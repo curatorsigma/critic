@@ -32,7 +32,10 @@ impl From<FolioTranscriptParseError> for ReadFolioTranscriptError {
 }
 impl std::error::Error for ReadFolioTranscriptError {}
 
-pub fn read_folio_transcript(path: &Path, meta: &WitnessMetadata) -> Result<FolioTranscript, ReadFolioTranscriptError> {
+pub fn read_folio_transcript(
+    path: &Path,
+    meta: &WitnessMetadata,
+) -> Result<FolioTranscript, ReadFolioTranscriptError> {
     // TODO: add the file name tried to the error message
     let content = read_to_string(path)?;
     Ok(FolioTranscript::from_folio_file_content(&content, meta)?)
@@ -89,14 +92,19 @@ impl core::fmt::Display for ReadWitnessDefinitionError {
                 write!(f, "Error reading from file: {x}")
             }
             Self::Toml(x) => {
-                write!(f, "Error parsing file as toml defining WitnessMetadata: {x}")
+                write!(
+                    f,
+                    "Error parsing file as toml defining WitnessMetadata: {x}"
+                )
             }
         }
     }
 }
 impl std::error::Error for ReadWitnessDefinitionError {}
 
-pub fn read_witness_metadata(file_name: &Path) -> Result<WitnessMetadata, ReadWitnessDefinitionError> {
+pub fn read_witness_metadata(
+    file_name: &Path,
+) -> Result<WitnessMetadata, ReadWitnessDefinitionError> {
     // TODO: add the tried file name to the error
     let content = read_to_string(file_name)?;
     Ok(toml::from_str(&content)?)
@@ -106,11 +114,16 @@ pub fn read_witness_metadata(file_name: &Path) -> Result<WitnessMetadata, ReadWi
 mod test {
     use critic_core::atg::Text;
 
-    use crate::{dialect::atg::ExampleAtgDialect, transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata}};
+    use crate::transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata};
 
     #[test]
-    #[cfg(all(feature = "language_example", feature = "anchor_example", feature = "atg_example"))]
+    #[cfg(all(
+        feature = "language_example",
+        feature = "anchor_example",
+        feature = "atg_example"
+    ))]
     fn folio_parse() {
+        use crate::dialect::atg::ExampleAtgDialect;
         let input = r#"
 [metadata]
 transcriber = "John Doe"
@@ -136,10 +149,29 @@ folios = ["name1"]
 "#;
         let witness_metadata = toml::from_str(witness_metadata_content).unwrap();
         let res = FolioTranscript::from_folio_file_content(input, &witness_metadata).unwrap();
-        let metadata = FolioTranscriptMetadata::new("John Doe".to_owned(), vec!["Alice".to_owned(), "Bob".to_owned()]);
+        let metadata = FolioTranscriptMetadata::new(
+            "John Doe".to_owned(),
+            vec!["Alice".to_owned(), "Bob".to_owned()],
+        );
         let dialect_blocks = vec![
-            AtgBlock::new(Text::parse::<ExampleAtgDialect>("this is §(1) my transcript", critic_core::anchor::AnchorDialect::Example).unwrap(), crate::language::Language::Example, "example".to_owned()),
-            AtgBlock::new(Text::parse::<ExampleAtgDialect>("some other t^(2)(ra)nscript", critic_core::anchor::AnchorDialect::Example).unwrap(), crate::language::Language::Example, "example".to_owned()),
+            AtgBlock::new(
+                Text::parse::<ExampleAtgDialect>(
+                    "this is §(1) my transcript",
+                    critic_core::anchor::AnchorDialect::Example,
+                )
+                .unwrap(),
+                crate::language::Language::Example,
+                crate::dialect::AtgDialectList::Example,
+            ),
+            AtgBlock::new(
+                Text::parse::<ExampleAtgDialect>(
+                    "some other t^(2)(ra)nscript",
+                    critic_core::anchor::AnchorDialect::Example,
+                )
+                .unwrap(),
+                crate::language::Language::Example,
+                crate::dialect::AtgDialectList::Example,
+            ),
         ];
         assert_eq!(res, FolioTranscript::new(metadata, dialect_blocks));
     }

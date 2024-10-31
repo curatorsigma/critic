@@ -10,7 +10,8 @@ use critic_core::atg::{AtgDialect, Text};
 use crate::language::{Language, WordNormalForm};
 
 pub fn normalise<D>(text: Text, language: Language) -> Vec<Vec<WordNormalForm>>
-where D: AtgDialect,
+where
+    D: AtgDialect,
 {
     text.auto_normalise::<D>()
         .into_iter()
