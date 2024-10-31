@@ -111,6 +111,8 @@ mod test {
     #[test]
     #[cfg(all(feature = "language_example", feature = "anchor_example", feature = "atg_example"))]
     fn folio_parse() {
+        use crate::transcribe::WitnessMetadata;
+
         let input = r#"
 [metadata]
 transcriber = "John Doe"
@@ -130,7 +132,12 @@ transcript = '''
 some other t^(2)(ra)nscript
 '''
 "#;
-        let res = input.parse::<FolioTranscript>().unwrap();
+        let witness_metadata_content = r#"
+name = "example witness"
+folios = ["name1"]
+"#;
+        let witness_metadata = toml::from_str(witness_metadata_content).unwrap();
+        let res = FolioTranscript::from_folio_file_content(input, &witness_metadata).unwrap();
         let metadata = FolioTranscriptMetadata::new("John Doe".to_owned(), vec!["Alice".to_owned(), "Bob".to_owned()]);
         let dialect_blocks = vec![
             AtgBlock::new(Text::parse::<ExampleAtgDialect>("this is §(1) my transcript", critic_core::anchor::AnchorDialect::Example).unwrap(), crate::language::Language::Example),
