@@ -216,19 +216,22 @@ impl TranscriptBlock {
 }
 
 /// A transcript of a single folio.
-// TODO: docs
 #[derive(Deserialize, Debug, PartialEq, Eq)]
 pub struct FolioTranscript {
+    /// The metadata associated specifically with this folio
     metadata: FolioTranscriptMetadata,
-    // TODO: rename this to blocks
-    // TODO: remove this pub??
-    pub dialect_blocks: Vec<AtgBlock>,
+    /// The individual blocks of ATG
+    ///
+    /// Usually, each folio will have only one [AtgBlock] associated. However, when the language or
+    /// script (or anchor style) changes in the middle of a Folio, we need to tag each individual
+    /// section with the correct dialects, which is why this Vec exists.
+    blocks: Vec<AtgBlock>,
 }
 impl FolioTranscript {
-    pub fn new(metadata: FolioTranscriptMetadata, dialect_blocks: Vec<AtgBlock>) -> Self {
+    pub fn new(metadata: FolioTranscriptMetadata, blocks: Vec<AtgBlock>) -> Self {
         Self {
             metadata,
-            dialect_blocks,
+            blocks,
         }
     }
 
@@ -240,7 +243,7 @@ impl FolioTranscript {
         let as_toml: toml::Table = toml::from_str(s)?;
         // parse table entry by table entry
         let mut metadata = None;
-        let mut dialect_blocks = Vec::<AtgBlock>::new();
+        let mut blocks = Vec::<AtgBlock>::new();
         // each other block must have as a name decimals in ascending order and be AtgBlock format
         for (key, value) in as_toml {
             if key == "metadata" {
@@ -253,7 +256,7 @@ impl FolioTranscript {
                 })?;
                 // The blocks are sorted in lexical order (by [toml]).
                 // We need to make sure the names were actually given in ascending order.
-                if num as usize != dialect_blocks.len() + 1 {
+                if num as usize != blocks.len() + 1 {
                     return Err(FolioTranscriptParseError {
                         location: None,
                         reason: FolioTranscriptParseErrorReason::BlockNameNotInAscendingOrder(num),
@@ -282,7 +285,7 @@ impl FolioTranscript {
                         }
                         Ok(x) => x,
                     };
-                dialect_blocks.push(AtgBlock::new(text, language, atg_dialect));
+                blocks.push(AtgBlock::new(text, language, atg_dialect));
             };
         }
         Ok(FolioTranscript::new(
@@ -290,7 +293,7 @@ impl FolioTranscript {
                 location: None,
                 reason: FolioTranscriptParseErrorReason::NoMetadata,
             })?,
-            dialect_blocks,
+            blocks,
         ))
     }
 }
@@ -366,5 +369,5 @@ impl Witness {
 /// The structure FolioTranscript files have on disk
 struct FolioTranscriptData {
     metadata: FolioTranscriptMetadata,
-    dialect_blocks: Vec<AtgBlock>,
+    blocks: Vec<AtgBlock>,
 }
