@@ -5,7 +5,7 @@ use std::{collections::HashMap, fs::{read_to_string, File}, path::Path, thread::
 use critic_core::{anchor::AnchorDialect, atg::{AtgParseError, Text}};
 use serde::Deserialize;
 
-use crate::{dialect::parse_by_dialect_name, language::Language};
+use crate::{dialect::parse_by_dialect_name, io::file::{read_witness_metadata, ReadWitnessDefinitionError, TranscriptIterator}, language::Language};
 
 /// Metadata associated to a single folio.
 #[derive(Deserialize, Debug, PartialEq, Eq)]
@@ -195,11 +195,14 @@ impl TranscriptBlock {
 
 
 /// A transcript of a single folio.
+// TODO: docs
 #[derive(Deserialize, Debug, PartialEq, Eq)]
 pub struct FolioTranscript
 {
     metadata: FolioTranscriptMetadata,
-    dialect_blocks: Vec<AtgBlock>,
+    // TODO: rename this to blocks
+    // TODO: remove this pub??
+    pub dialect_blocks: Vec<AtgBlock>,
 }
 impl FolioTranscript
 {
@@ -210,7 +213,7 @@ impl FolioTranscript
         }
     }
 
-    pub fn from_folio_file_content(s: &str, witness_metadata: WitnessMetadata) -> Result<Self, FolioTranscriptParseError> {
+    pub fn from_folio_file_content(s: &str, witness_metadata: &WitnessMetadata) -> Result<Self, FolioTranscriptParseError> {
         // interpret s as toml object
         let as_toml: toml::Table = toml::from_str(s)?;
         // parse table entry by table entry
@@ -288,19 +291,29 @@ pub struct WitnessMetadata {
     default_anchor: Option<String>,
     default_language: Option<String>,
 }
+impl WitnessMetadata {
+    pub fn folios(&self) -> &Vec<String> {
+        &self.folios
+    }
+}
 
 #[derive(PartialEq, Eq, Debug)]
 pub struct Witness {
     metadata: WitnessMetadata,
 }
 impl Witness {
-    fn folio_names(&self) -> core::slice::Iter<String> {
+    pub fn from_path(path: &std::path::Path) -> Result<Self, ReadWitnessDefinitionError> {
+        let metadata = read_witness_metadata(path)?;
+        Ok(Self { metadata })
+    }
+
+    pub fn folio_names(&self) -> core::slice::Iter<String> {
         self.metadata.folios.iter()
     }
 
-    fn folios(&self, base_dir: &std::path::Path) -> core::slice::Iter<(String, FolioTranscript)> {
+    pub fn get_folios<'a, 'b>(&'a self, base_dir: &'b std::path::Path) -> TranscriptIterator<'a, 'b> {
         // return the correct iterator here
-        todo!();
+        TranscriptIterator::new(&self.metadata, base_dir)
     }
 }
 

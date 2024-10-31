@@ -6,5 +6,5 @@
 //!
 //! The end user should add data from flat files (which can easily be tracked in git), let critic
 //! convert that data to SQL and can then query it (which is much easier once the data is SQL).
-mod db;
-mod file;
+pub mod db;
+pub mod file;

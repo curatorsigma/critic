@@ -32,31 +32,38 @@ impl From<FolioTranscriptParseError> for ReadFolioTranscriptError {
 }
 impl std::error::Error for ReadFolioTranscriptError {}
 
-pub fn read_folio_transcript(path: &Path, meta: WitnessMetadata) -> Result<FolioTranscript, ReadFolioTranscriptError> {
+pub fn read_folio_transcript(path: &Path, meta: &WitnessMetadata) -> Result<FolioTranscript, ReadFolioTranscriptError> {
+    // TODO: add the file name tried to the error message
     let content = read_to_string(path)?;
     Ok(FolioTranscript::from_folio_file_content(&content, meta)?)
 }
 
-struct TranscriptIterator<'a> {
-    metadata: WitnessMetadata,
-    base_dir: &'a std::path::Path,
+pub struct TranscriptIterator<'a, 'b> {
+    metadata: &'a WitnessMetadata,
+    base_dir: &'b std::path::Path,
     current: usize,
 }
-impl<'a> Iterator for TranscriptIterator<'a> {
-    type Item = (String, FolioTranscript);
+impl<'a, 'b> TranscriptIterator<'a, 'b> {
+    pub fn new(metadata: &'a WitnessMetadata, base_dir: &'b std::path::Path) -> Self {
+        Self {
+            metadata,
+            base_dir,
+            current: 0,
+        }
+    }
+}
+impl<'a, 'b> Iterator for TranscriptIterator<'a, 'b> {
+    type Item = (String, Result<FolioTranscript, ReadFolioTranscriptError>);
 
-    // TODO: error handling
     fn next(&mut self) -> Option<Self::Item> {
-        todo!();
-        /*
-        if let Some(folio_name) = self.metadata.folios.get(self.current) {
-            let full_path = self.base_dir.join(folio_name);
-            let folio_data = read_folio_transcript();
+        if let Some(folio_name) = self.metadata.folios().get(self.current) {
+            let full_path = self.base_dir.join(folio_name).with_extension("toml");
+            let folio_data = read_folio_transcript(&full_path, &self.metadata);
+            self.current += 1;
+            return Some((folio_name.to_owned(), folio_data));
         } else {
-            None
+            return None;
         };
-        self.current += 1;
-        */
     }
 }
 
@@ -89,7 +96,8 @@ impl core::fmt::Display for ReadWitnessDefinitionError {
 }
 impl std::error::Error for ReadWitnessDefinitionError {}
 
-pub fn read_witness_definition(file_name: &Path) -> Result<WitnessMetadata, ReadWitnessDefinitionError> {
+pub fn read_witness_metadata(file_name: &Path) -> Result<WitnessMetadata, ReadWitnessDefinitionError> {
+    // TODO: add the tried file name to the error
     let content = read_to_string(file_name)?;
     Ok(toml::from_str(&content)?)
 }
