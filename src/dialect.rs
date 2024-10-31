@@ -8,8 +8,6 @@ use critic_core::{
 };
 use serde::Deserialize;
 
-use crate::transcribe::FolioTranscriptParseError;
-
 pub mod anchor;
 pub mod atg;
 
@@ -62,13 +60,16 @@ pub fn parse_by_dialect_name(
     }
 }
 
-pub fn parse_by_dialect(input: &str, atg_dialect: &AtgDialectList, anchor_dialect: AnchorDialect) -> Result<Text, AtgParseError> {
+pub fn parse_by_dialect(
+    input: &str,
+    atg_dialect: &AtgDialectList,
+    anchor_dialect: AnchorDialect,
+) -> Result<Text, AtgParseError> {
     match atg_dialect {
         #[cfg(feature = "atg_example")]
-        AtgDialectList::Example => Text::parse::<crate::dialect::atg::ExampleAtgDialect>(
-            input,
-            anchor_dialect,
-        ),
+        AtgDialectList::Example => {
+            Text::parse::<crate::dialect::atg::ExampleAtgDialect>(input, anchor_dialect)
+        }
         // this happens only if Language is empty (no language feature enabled)
         // but in this case, Language is the bottom type anyways
         _ => unreachable!(),

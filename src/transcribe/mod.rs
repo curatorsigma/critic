@@ -64,11 +64,10 @@ impl From<AtgDialectUnknown> for FolioTranscriptParseError {
     fn from(value: AtgDialectUnknown) -> Self {
         FolioTranscriptParseError {
             location: None,
-            reason: FolioTranscriptParseErrorReason::AtgDialectUnknown(value.name)
+            reason: FolioTranscriptParseErrorReason::AtgDialectUnknown(value.name),
         }
     }
 }
-
 
 /// The reasons for which Folio parsing can fail.
 #[derive(Debug)]

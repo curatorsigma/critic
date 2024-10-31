@@ -13,7 +13,7 @@ mod transcribe;
 
 fn main() {
     let wit = Witness::from_path(Path::new(".data/witness.toml")).unwrap();
-    let mut folios = wit
+    let folios = wit
         .get_folios(Path::new(".data/ExampleWitness/"))
         .collect::<Vec<_>>();
     dbg!(&folios);

@@ -13,7 +13,7 @@ pub fn normalise(input: Vec<(Word, String)>) -> Vec<WordNormalForm> {
 
 #[cfg(test)]
 mod test {
-    use critic_core::{anchor::example::Example, atg::Text};
+    use critic_core::atg::Text;
 
     use crate::normalise::normalise;
 
