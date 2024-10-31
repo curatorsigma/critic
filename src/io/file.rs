@@ -35,8 +35,8 @@ pub fn read_folio_transcript(
     path: &Path,
     meta: &WitnessMetadata,
 ) -> Result<FolioTranscript, ReadFolioTranscriptError> {
-    // TODO: add the file name tried to the error message
-    let content = read_to_string(path).map_err(|x| ReadFolioTranscriptError::Io(x, path.to_string_lossy().to_string()))?;
+    let content = read_to_string(path)
+        .map_err(|x| ReadFolioTranscriptError::Io(x, path.to_string_lossy().to_string()))?;
     Ok(FolioTranscript::from_folio_file_content(&content, meta)?)
 }
 
@@ -100,10 +100,9 @@ impl core::fmt::Display for ReadWitnessDefinitionError {
 }
 impl std::error::Error for ReadWitnessDefinitionError {}
 
-pub fn read_witness_metadata(
-    path: &Path,
-) -> Result<WitnessMetadata, ReadWitnessDefinitionError> {
-    let content = read_to_string(path).map_err(|x| ReadWitnessDefinitionError::Io(x, path.to_string_lossy().to_string()))?;
+pub fn read_witness_metadata(path: &Path) -> Result<WitnessMetadata, ReadWitnessDefinitionError> {
+    let content = read_to_string(path)
+        .map_err(|x| ReadWitnessDefinitionError::Io(x, path.to_string_lossy().to_string()))?;
     Ok(toml::from_str(&content)?)
 }
 
@@ -113,7 +112,10 @@ mod test {
 
     use critic_core::atg::Text;
 
-    use crate::{io::file::read_folio_transcript, transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata, WitnessMetadata}};
+    use crate::{
+        io::file::read_folio_transcript,
+        transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata, WitnessMetadata},
+    };
 
     use super::read_witness_metadata;
 
@@ -182,7 +184,7 @@ folios = ["name1"]
         let path = Path::new("does/not/exist.toml");
         let error = read_witness_metadata(path).unwrap_err();
         let filename = match error {
-            super::ReadWitnessDefinitionError::Io(_, x) => { x }
+            super::ReadWitnessDefinitionError::Io(_, x) => x,
             _ => panic!(),
         };
         assert_eq!(filename, "does/not/exist.toml".to_owned());
@@ -198,7 +200,7 @@ folios = ["name1"]
         let witness_metadata = toml::from_str(witness_metadata_content).unwrap();
         let error = read_folio_transcript(path, &witness_metadata).unwrap_err();
         let filename = match error {
-            super::ReadFolioTranscriptError::Io(_, x) => { x }
+            super::ReadFolioTranscriptError::Io(_, x) => x,
             _ => panic!(),
         };
         assert_eq!(filename, "does/not/exist.toml".to_owned());

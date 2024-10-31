@@ -229,10 +229,7 @@ pub struct FolioTranscript {
 }
 impl FolioTranscript {
     pub fn new(metadata: FolioTranscriptMetadata, blocks: Vec<AtgBlock>) -> Self {
-        Self {
-            metadata,
-            blocks,
-        }
+        Self { metadata, blocks }
     }
 
     pub fn from_folio_file_content(

@@ -4,6 +4,16 @@ use critic_core::atg::Word;
 use serde::Deserialize;
 
 mod example;
+pub use example::Example;
+
+use crate::lex::{LexSchema, MorphPointSchema};
+
+pub trait SuperLanguage {
+    type Morph: MorphPointSchema;
+    type Lex: LexSchema;
+
+    fn normalise(input: Vec<(Word, String)>) -> Vec<WordNormalForm>;
+}
 
 /// A natural language which has an associated lexeme- and morphological system.
 #[derive(Deserialize, Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -27,7 +37,7 @@ impl Language {
     pub fn normalise(&self, text: Vec<(Word, String)>) -> Vec<WordNormalForm> {
         match self {
             #[cfg(feature = "language_example")]
-            Self::Example => crate::language::example::normalise(text),
+            Self::Example => crate::language::Example::normalise(text),
             // this happens only if Language is empty (no language feature enabled)
             // but in this case, Language is the bottom type anyways
             _ => unreachable!(),
@@ -36,6 +46,7 @@ impl Language {
 }
 
 /// Normal form of a word
+#[derive(Debug)]
 pub struct WordNormalForm {
     annotated_form: Word,
     /// Form used for displaying the word when displayed without ATG annotations
