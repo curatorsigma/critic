@@ -7,22 +7,21 @@ use std::{fs::read_to_string, path::Path};
 
 use crate::transcribe::{FolioTranscript, FolioTranscriptParseError, WitnessMetadata};
 
+/// Error that can occur while reading a single folio file from disk
 #[derive(Debug)]
 pub enum ReadFolioTranscriptError {
-    Io(std::io::Error),
+    /// Something went wrong while reading the file itself
+    Io(std::io::Error, String),
+    /// The file was read successfully, but something went wrong interpreting its content as a
+    /// Folio Transcript
     Content(FolioTranscriptParseError),
 }
 impl core::fmt::Display for ReadFolioTranscriptError {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         match self {
-            Self::Io(x) => write!(f, "Error reading from file: {x}."),
+            Self::Io(x, path) => write!(f, "Error reading from file \"{path}\": {x}."),
             Self::Content(x) => write!(f, "Error parsing the data in the file: {x}."),
         }
-    }
-}
-impl From<std::io::Error> for ReadFolioTranscriptError {
-    fn from(value: std::io::Error) -> Self {
-        Self::Io(value)
     }
 }
 impl From<FolioTranscriptParseError> for ReadFolioTranscriptError {
@@ -37,7 +36,7 @@ pub fn read_folio_transcript(
     meta: &WitnessMetadata,
 ) -> Result<FolioTranscript, ReadFolioTranscriptError> {
     // TODO: add the file name tried to the error message
-    let content = read_to_string(path)?;
+    let content = read_to_string(path).map_err(|x| ReadFolioTranscriptError::Io(x, path.to_string_lossy().to_string()))?;
     Ok(FolioTranscript::from_folio_file_content(&content, meta)?)
 }
 
@@ -70,15 +69,14 @@ impl<'a, 'b> Iterator for TranscriptIterator<'a, 'b> {
     }
 }
 
+/// An Error that can occur while reading a witness definition from disk
 #[derive(Debug)]
 pub enum ReadWitnessDefinitionError {
-    Io(std::io::Error),
+    /// Something went wrong while reading the file itself
+    Io(std::io::Error, String),
+    /// The file was read successfully, but something went wrong interpreting its content as a
+    /// Witness Definition
     Toml(toml::de::Error),
-}
-impl From<std::io::Error> for ReadWitnessDefinitionError {
-    fn from(value: std::io::Error) -> Self {
-        Self::Io(value)
-    }
 }
 impl From<toml::de::Error> for ReadWitnessDefinitionError {
     fn from(value: toml::de::Error) -> Self {
@@ -88,8 +86,8 @@ impl From<toml::de::Error> for ReadWitnessDefinitionError {
 impl core::fmt::Display for ReadWitnessDefinitionError {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         match self {
-            Self::Io(x) => {
-                write!(f, "Error reading from file: {x}")
+            Self::Io(x, path) => {
+                write!(f, "Error reading from file \"{path}\": {x}")
             }
             Self::Toml(x) => {
                 write!(
@@ -103,18 +101,21 @@ impl core::fmt::Display for ReadWitnessDefinitionError {
 impl std::error::Error for ReadWitnessDefinitionError {}
 
 pub fn read_witness_metadata(
-    file_name: &Path,
+    path: &Path,
 ) -> Result<WitnessMetadata, ReadWitnessDefinitionError> {
-    // TODO: add the tried file name to the error
-    let content = read_to_string(file_name)?;
+    let content = read_to_string(path).map_err(|x| ReadWitnessDefinitionError::Io(x, path.to_string_lossy().to_string()))?;
     Ok(toml::from_str(&content)?)
 }
 
 #[cfg(test)]
 mod test {
+    use std::path::Path;
+
     use critic_core::atg::Text;
 
-    use crate::transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata};
+    use crate::{io::file::read_folio_transcript, transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata, WitnessMetadata}};
+
+    use super::read_witness_metadata;
 
     #[test]
     #[cfg(all(
@@ -174,5 +175,32 @@ folios = ["name1"]
             ),
         ];
         assert_eq!(res, FolioTranscript::new(metadata, dialect_blocks));
+    }
+
+    #[test]
+    fn read_witness_definition_file_nonex() {
+        let path = Path::new("does/not/exist.toml");
+        let error = read_witness_metadata(path).unwrap_err();
+        let filename = match error {
+            super::ReadWitnessDefinitionError::Io(_, x) => { x }
+            _ => panic!(),
+        };
+        assert_eq!(filename, "does/not/exist.toml".to_owned());
+    }
+
+    #[test]
+    fn read_folio_transcript_file_nonex() {
+        let path = Path::new("does/not/exist.toml");
+        let witness_metadata_content = r#"
+name = "example witness"
+folios = ["name1"]
+"#;
+        let witness_metadata = toml::from_str(witness_metadata_content).unwrap();
+        let error = read_folio_transcript(path, &witness_metadata).unwrap_err();
+        let filename = match error {
+            super::ReadFolioTranscriptError::Io(_, x) => { x }
+            _ => panic!(),
+        };
+        assert_eq!(filename, "does/not/exist.toml".to_owned());
     }
 }
