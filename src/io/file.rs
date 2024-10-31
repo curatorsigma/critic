@@ -111,8 +111,6 @@ mod test {
     #[test]
     #[cfg(all(feature = "language_example", feature = "anchor_example", feature = "atg_example"))]
     fn folio_parse() {
-        use crate::transcribe::WitnessMetadata;
-
         let input = r#"
 [metadata]
 transcriber = "John Doe"
@@ -140,8 +138,8 @@ folios = ["name1"]
         let res = FolioTranscript::from_folio_file_content(input, &witness_metadata).unwrap();
         let metadata = FolioTranscriptMetadata::new("John Doe".to_owned(), vec!["Alice".to_owned(), "Bob".to_owned()]);
         let dialect_blocks = vec![
-            AtgBlock::new(Text::parse::<ExampleAtgDialect>("this is §(1) my transcript", critic_core::anchor::AnchorDialect::Example).unwrap(), crate::language::Language::Example),
-            AtgBlock::new(Text::parse::<ExampleAtgDialect>("some other t^(2)(ra)nscript", critic_core::anchor::AnchorDialect::Example).unwrap(), crate::language::Language::Example),
+            AtgBlock::new(Text::parse::<ExampleAtgDialect>("this is §(1) my transcript", critic_core::anchor::AnchorDialect::Example).unwrap(), crate::language::Language::Example, "example".to_owned()),
+            AtgBlock::new(Text::parse::<ExampleAtgDialect>("some other t^(2)(ra)nscript", critic_core::anchor::AnchorDialect::Example).unwrap(), crate::language::Language::Example, "example".to_owned()),
         ];
         assert_eq!(res, FolioTranscript::new(metadata, dialect_blocks));
     }

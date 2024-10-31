@@ -255,7 +255,7 @@ impl FolioTranscript
                     }
                     Some(Ok(x)) => { x }
                 };
-                dialect_blocks.push(AtgBlock::new(text, language));
+                dialect_blocks.push(AtgBlock::new(text, language, atg));
             };
         };
         Ok(FolioTranscript::new(
@@ -273,12 +273,14 @@ pub struct AtgBlock
 {
     text: Text,
     language: Language,
+    atg_dialect: String,
 }
 impl AtgBlock {
-    pub fn new(text: Text, language: Language) -> Self {
+    pub fn new(text: Text, language: Language, atg_dialect: String) -> Self {
         Self {
             text,
             language,
+            atg_dialect,
         }
     }
 }
