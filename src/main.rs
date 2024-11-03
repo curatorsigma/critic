@@ -29,6 +29,9 @@ fn main() {
     // - they break words and behave as words on their own (normal token)
 
     // TODO:
+    // - merge critic_core into critic
+
+    // TODO:
     // - there could be words split over two folios
     // - if this happens: mark the part of the word on the first folio with the lex data for the
     //   entire word and mark the part of the word on the second folio with
@@ -40,8 +43,7 @@ fn main() {
     //   we have to faithfully represent each folio that means we will have partial words on some
     //   occasions. We can ignore them while reading the filled lex file back
 
-    // TODO: serialization for NormalisedAtgBlock into lex files
-    // - method should later be adaptable to add automatic lex information from known forms
+    // Add expandability to have the lex output make proposals for lex and morph data
 
     // TODO: reading lex files from disk into a LexedFolioTranscript
 
