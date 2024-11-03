@@ -31,7 +31,7 @@ impl core::fmt::Display for AtgDialectUnknown {
 }
 impl std::error::Error for AtgDialectUnknown {}
 
-#[derive(Debug, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Deserialize, PartialEq, Eq, Clone)]
 pub enum AtgDialectList {
     #[cfg(feature = "atg_example")]
     Example,

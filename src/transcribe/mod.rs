@@ -9,7 +9,7 @@ use serde::Deserialize;
 use crate::{
     dialect::{parse_by_dialect, AtgDialectList, AtgDialectUnknown},
     io::file::{read_witness_metadata, ReadWitnessDefinitionError, TranscriptIterator},
-    language::Language,
+    language::Language, normalise::UniqueAtgBlock,
 };
 
 /// Metadata associated to a single folio.
@@ -327,6 +327,14 @@ impl AtgBlock {
             language,
             atg_dialect: dialect,
         })
+    }
+
+    /// flatten out different corrections in one AtgBlock
+    pub fn into_unique_blocks(self) -> impl Iterator<Item = UniqueAtgBlock> {
+        let language = self.language;
+        let atg_dialect = self.atg_dialect;
+        let texts = self.text.into_unique_texts();
+        texts.into_iter().map(move |t| UniqueAtgBlock::new(t, language.clone(), atg_dialect.clone()))
     }
 }
 

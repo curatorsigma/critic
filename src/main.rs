@@ -31,6 +31,14 @@ fn main() {
     let manual = lexworddata.to_toml_str();
     dbg!(&manual);
 
+    // TODO: add Version/Correction metadata to witness definition
+
+    // FolioTranscript -> Vec<NormalisedFolioTranscript>
+    // NormalisedFolioTranscript:: (metadata, Vec<NormalisedAtgBlock>)
+    // NormalisedAtgBlock:: a block of ATG, without corrections, flattened to WordNormalForm s, with Anchor locations
+    // attached
+    // serialization for NormalisedAtgBlock into LexBlockData
+
     // LexBlockData + dialects -> LexBlock
     // TODO: LexBlockData - 1:1 das Format, das in Lex-Dateien steht (pro AtgBlock)
     // TODO: LexFileData - 1:1 das Format, das in Lex-Dateien steht (gesamt)

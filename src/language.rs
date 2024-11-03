@@ -1,6 +1,6 @@
 //! Everything to do with defining natural languages
 
-use critic_core::atg::Word;
+use critic_core::atg::{AnchoredNormalisedText, Word};
 use serde::Deserialize;
 
 mod example;
@@ -12,7 +12,7 @@ pub trait SuperLanguage {
     type Morph: MorphPointSchema;
     type Lex: LexSchema;
 
-    fn normalise(input: Vec<(Word, String)>) -> Vec<WordNormalForm>;
+    fn normalise(input: AnchoredNormalisedText) -> Vec<WordNormalForm>;
 }
 
 /// A natural language which has an associated lexeme- and morphological system.
@@ -34,7 +34,7 @@ impl Language {
     }
 
     /// Do the normalisation steps which depend on the language
-    pub fn normalise(&self, text: Vec<(Word, String)>) -> Vec<WordNormalForm> {
+    pub fn normalise(&self, text: AnchoredNormalisedText) -> Vec<WordNormalForm> {
         match self {
             #[cfg(feature = "language_example")]
             Self::Example => crate::language::Example::normalise(text),

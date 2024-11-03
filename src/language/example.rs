@@ -2,7 +2,7 @@
 
 use std::str::FromStr;
 
-use critic_core::atg::Word;
+use critic_core::atg::{AnchoredNormalisedText, Word};
 
 use crate::lex::{LexParseError, LexSchema, MorphPointParseError, MorphPointSchema, MorphRangeParseError, MorphRangeSchema};
 
@@ -103,8 +103,9 @@ impl SuperLanguage for Example {
     type Lex = ExampleLex;
     type Morph = ExampleMorph;
 
-    fn normalise(input: Vec<(Word, String)>) -> Vec<WordNormalForm> {
+    fn normalise(input: AnchoredNormalisedText) -> Vec<WordNormalForm> {
         input
+            .text()
             .into_iter()
             .map(|(w, s)| WordNormalForm::new(w, s, None))
             .collect::<Vec<_>>()
