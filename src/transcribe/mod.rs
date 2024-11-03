@@ -392,10 +392,29 @@ impl AtgBlock {
 
 #[derive(Deserialize, PartialEq, Eq, Hash, Debug)]
 pub struct WitnessMetadata {
+    /// A name for this Witness
+    ///
+    /// This should be unique amongst all witnesses
     name: String,
+    /// The Folios making up this witness, by name
+    ///
+    /// Their names must match the names of the folio files on disk
     folios: Vec<String>,
+    /// The human readable Names for each correctors hand that was active in this
+    /// Witness. The length of all correction sequences must be the same as the length of this
+    /// Vector.
+    ///
+    /// When a specific correction needs to be refered to, this name will be used instead of the
+    /// name of the entire Witness
+    corrections: Vec<String>,
+    /// For blocks which have no ATG dialect specified, use this default instead
+    ///
+    /// Since the ATG dialect, Anchor style and Language usually does not change in the middle of a
+    /// Witness, you should always aim to supply these default options.
     default_atg: Option<String>,
+    /// For blocks which have no anchor style specified, use this default instead
     default_anchor: Option<String>,
+    /// For blocks which have no natural language specified, use this default instead
     default_language: Option<String>,
 }
 impl WitnessMetadata {
