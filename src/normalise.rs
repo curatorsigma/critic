@@ -11,10 +11,13 @@ use critic_core::{
 };
 
 use crate::{
-    dialect::{atg::ExampleAtgDialect, AtgDialectList},
+    dialect::AtgDialectList,
     language::{Language, WordNormalForm},
     transcribe::FolioTranscriptMetadata,
 };
+
+#[cfg(feature = "atg_example")]
+use crate::dialect::atg::ExampleAtgDialect;
 
 /// A text which was normalised with the method relying on the language
 #[derive(Debug)]

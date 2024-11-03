@@ -25,6 +25,10 @@ fn main() {
     dbg!(&write_to_file);
 
     // TODO:
+    // Add punctuation to critic core
+    // - they break words and behave as words on their own (normal token)
+
+    // TODO:
     // - there could be words split over two folios
     // - if this happens: mark the part of the word on the first folio with the lex data for the
     //   entire word and mark the part of the word on the second folio with
