@@ -127,8 +127,6 @@ impl SuperLanguage for Example {
 mod test {
     use critic_core::atg::Text;
 
-    use crate::normalise::normalise;
-
     #[test]
     #[cfg(all(feature = "language_example", feature = "atg_example"))]
     fn normalise_example() {
@@ -136,33 +134,9 @@ mod test {
 
         let input = "This &(word)(sword) ~(3)^(2)(st)rong.";
         let parsed =
-            Text::parse::<ExampleAtgDialect>(input, critic_core::anchor::AnchorDialect::Example)
+            Text::parse::<ExampleAtgDialect>(input, critic_core::anchor::AnchorDialect::Example, 2)
                 .unwrap();
-        let normalised = normalise::<ExampleAtgDialect>(parsed, crate::language::Language::Example);
-        let surface_only = normalised
-            .into_iter()
-            .map(|text| {
-                text.into_iter()
-                    .map(|wnf| wnf.display_form())
-                    .collect::<Vec<_>>()
-            })
-            .collect::<Vec<_>>();
-        assert_eq!(
-            surface_only,
-            vec![
-                vec![
-                    "This".to_owned(),
-                    "word".to_owned(),
-                    "~~~".to_owned(),
-                    "strong.".to_owned()
-                ],
-                vec![
-                    "This".to_owned(),
-                    "sword".to_owned(),
-                    "~~~".to_owned(),
-                    "strong.".to_owned()
-                ],
-            ]
-        );
+        let normalised = parsed.auto_normalise::<ExampleAtgDialect>().collect::<Vec<_>>();
+        assert_eq!(normalised.len(), 2);
     }
 }

@@ -18,16 +18,6 @@ use crate::{
     transcribe::FolioTranscriptMetadata,
 };
 
-// pub fn normalise<D>(text: Text, language: Language) -> Vec<Vec<WordNormalForm>>
-// where
-//     D: AtgDialect,
-// {
-//     text.auto_normalise::<D>()
-//         .into_iter()
-//         .map(|w| language.normalise(w))
-//         .collect::<Vec<_>>()
-// }
-
 pub struct NonAgnosticAnchoredText {
     text: Vec<WordNormalForm>,
     anchor_positions: HashMap<Anchor, usize>,

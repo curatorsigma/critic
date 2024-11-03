@@ -149,6 +149,7 @@ some other t^(2)(ra)nscript
         let witness_metadata_content = r#"
 name = "example witness"
 folios = ["name1"]
+corrections = ["literally irrelevant"]
 "#;
         let witness_metadata = toml::from_str(witness_metadata_content).unwrap();
         let res = FolioTranscript::from_folio_file_content(input, &witness_metadata).unwrap();
@@ -161,6 +162,7 @@ folios = ["name1"]
                 Text::parse::<ExampleAtgDialect>(
                     "this is §(1) my transcript",
                     critic_core::anchor::AnchorDialect::Example,
+                    1,
                 )
                 .unwrap(),
                 crate::language::Language::Example,
@@ -170,6 +172,7 @@ folios = ["name1"]
                 Text::parse::<ExampleAtgDialect>(
                     "some other t^(2)(ra)nscript",
                     critic_core::anchor::AnchorDialect::Example,
+                    1,
                 )
                 .unwrap(),
                 crate::language::Language::Example,
@@ -196,6 +199,7 @@ folios = ["name1"]
         let witness_metadata_content = r#"
 name = "example witness"
 folios = ["name1"]
+corrections = ["literally irrelevant"]
 "#;
         let witness_metadata = toml::from_str(witness_metadata_content).unwrap();
         let error = read_folio_transcript(path, &witness_metadata).unwrap_err();
