@@ -6,13 +6,13 @@ use serde::Deserialize;
 mod example;
 pub use example::Example;
 
-use crate::lex::{LexSchema, MorphPointSchema};
+use crate::{lex::{LexSchema, MorphPointSchema}, normalise::NonAgnosticAnchoredText};
 
 pub trait SuperLanguage {
     type Morph: MorphPointSchema;
     type Lex: LexSchema;
 
-    fn normalise(input: AnchoredNormalisedText) -> Vec<WordNormalForm>;
+    fn normalise(input: AnchoredNormalisedText) -> NonAgnosticAnchoredText;
 }
 
 /// A natural language which has an associated lexeme- and morphological system.
@@ -34,7 +34,7 @@ impl Language {
     }
 
     /// Do the normalisation steps which depend on the language
-    pub fn normalise(&self, text: AnchoredNormalisedText) -> Vec<WordNormalForm> {
+    pub fn normalise(&self, text: AnchoredNormalisedText) -> NonAgnosticAnchoredText {
         match self {
             #[cfg(feature = "language_example")]
             Self::Example => crate::language::Example::normalise(text),

@@ -38,12 +38,12 @@ fn main() {
     dbg!(&manual);
 
     // TODO: add Version/Correction metadata to witness definition
+    // use this to create a new type of error in parsing when the number of corrections is not
+    // correct
 
     // FolioTranscript -> Vec<NormalisedFolioTranscript>
     // NormalisedFolioTranscript:: (metadata, Vec<NormalisedAtgBlock>)
-    // NormalisedAtgBlock:: a block of ATG, without corrections, flattened to WordNormalForm s, with Anchor locations
-    // attached
-    // serialization for NormalisedAtgBlock into LexBlockData
+    // serialization for NormalisedAtgBlock into lex files
 
     // LexBlockData + dialects -> LexBlock
     // TODO: LexBlockData - 1:1 das Format, das in Lex-Dateien steht (pro AtgBlock)

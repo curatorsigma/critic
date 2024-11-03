@@ -7,33 +7,38 @@
 
 use std::collections::HashMap;
 
-use critic_core::{
-    anchor::Anchor,
-    atg::{AtgDialect, Text, UniqueText},
-};
+use critic_core::{anchor::Anchor, atg::{AnchoredNormalisedText, AtgDialect, UniqueText}};
 
 use crate::{
     dialect::AtgDialectList,
     language::{Language, WordNormalForm},
-    transcribe::AtgBlock,
+    transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata},
 };
 
-pub fn normalise<D>(text: Text, language: Language) -> Vec<Vec<WordNormalForm>>
-where
-    D: AtgDialect,
-{
-    text.auto_normalise::<D>()
-        .into_iter()
-        .map(|w| language.normalise(w))
-        .collect::<Vec<_>>()
+// pub fn normalise<D>(text: Text, language: Language) -> Vec<Vec<WordNormalForm>>
+// where
+//     D: AtgDialect,
+// {
+//     text.auto_normalise::<D>()
+//         .into_iter()
+//         .map(|w| language.normalise(w))
+//         .collect::<Vec<_>>()
+// }
+
+pub struct NonAgnosticAnchoredText {
+    text: Vec<WordNormalForm>,
+    anchor_positions: HashMap<Anchor, usize>,
+}
+impl NonAgnosticAnchoredText {
+    pub fn new(text: Vec<WordNormalForm>, anchor_positions: HashMap<Anchor, usize>) -> Self {
+        Self { text, anchor_positions, }
+    }
 }
 
 /// A Block of ATG, with versions flattened out and words normalised
 pub struct NormalisedAtgBlock {
-    /// the actual text in this block
-    text: Vec<WordNormalForm>,
-    /// The positions for individual anchors
-    anchor_positions: HashMap<Anchor, usize>,
+    /// the actual text, normalised and with anchor positions
+    text: NonAgnosticAnchoredText,
     /// the language used in this block
     language: Language,
     /// the atg dialect used in this block
@@ -60,12 +65,22 @@ impl UniqueAtgBlock {
         }
     }
 
-    pub fn normalise(self) -> NormalisedAtgBlock {
-        // iterate over the text, creating the anchor positions and word normal forms
-        todo!();
+    /// Replace the text in this [UniqueAtgBlock] with the normalised text
+    pub fn normalise<D>(self, language: Language) -> NormalisedAtgBlock
+        where D: AtgDialect,
+    {
+        let text_agnostic = self.text.split_words::<D>().into_anchored_normalised_text::<D>();
+        NormalisedAtgBlock { text: language.normalise(text_agnostic), language: self.language, atg_dialect: self.atg_dialect }
     }
 }
 
-pub fn normalise_atg_block(block: AtgBlock) -> impl Iterator<Item = NormalisedAtgBlock> {
-    block.into_unique_blocks().map(|b| b.normalise())
+/// A transcribed Folio, 
+pub struct NormalisedFolioTranscript {
+    metadata: FolioTranscriptMetadata,
+    blocks: Vec<NormalisedAtgBlock>,
+}
+impl NormalisedFolioTranscript {
+    pub fn new(metadata: FolioTranscriptMetadata, blocks: Vec<NormalisedAtgBlock>) -> Self {
+        Self { metadata, blocks, }
+    }
 }
