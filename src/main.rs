@@ -1,9 +1,7 @@
 use std::path::Path;
 
-use critic_core::atg::Word;
+use io::file::output_lex_file;
 use transcribe::Witness;
-
-use crate::lex::LexWordData;
 
 mod dialect;
 mod language;
@@ -16,33 +14,33 @@ mod transcribe;
 
 fn main() {
     let wit = Witness::from_path(Path::new(".data/witness.toml")).unwrap();
-    let folios = wit
+    let mut folios = wit
         .get_folios(Path::new(".data/ExampleWitness/"))
         .collect::<Vec<_>>();
-    // dbg!(&folios);
+    let (_, result) = folios.remove(0);
+    let folio = result.unwrap();
+    let mut versions = folio.normalise();
+    let normalised = versions.remove(0);
+    let write_to_file = output_lex_file(Path::new(".data/Lex/example.toml"), normalised);
+    dbg!(&write_to_file);
 
-    // let input = r#""#;
-    let word: Word = toml::de::from_str("[[parts]]\nNative = \"some\"\n").unwrap();
-    dbg!(&word);
-    let lexworddata = LexWordData::new(
-        word,
-        "some".to_owned(),
-        None,
-        "1".to_owned(),
-        "N".to_owned(),
-    );
-    dbg!(&lexworddata);
-    let straight = toml::to_string(&lexworddata);
-    dbg!(&straight);
-    let manual = lexworddata.to_toml_str();
-    dbg!(&manual);
+    // TODO:
+    // - there could be words split over two folios
+    // - if this happens: mark the part of the word on the first folio with the lex data for the
+    //   entire word and mark the part of the word on the second folio with
+    //   "second_half_of_cross_folio_break = true"
+    //      - words with this marker that appear as the first word of a folio will be ignored
+    //        completely when reading in lex
+    //      - words with this marker anywhere else will raise an error
+    // - rationale: We want to lex based on folio, not on witness, to keep file sizes small. Since
+    //   we have to faithfully represent each folio that means we will have partial words on some
+    //   occasions. We can ignore them while reading the filled lex file back
 
-    // serialization for NormalisedAtgBlock into lex files
+    // TODO: serialization for NormalisedAtgBlock into lex files
+    // - method should later be adaptable to add automatic lex information from known forms
 
-    // LexBlockData + dialects -> LexBlock
-    // TODO: LexBlockData - 1:1 das Format, das in Lex-Dateien steht (pro AtgBlock)
-    // TODO: LexFileData - 1:1 das Format, das in Lex-Dateien steht (gesamt)
-    //
+    // TODO: reading lex files from disk into a LexedFolioTranscript
+
     // TODO: write a function to concat multiple folios into a vec of text + language
     // TODO: then write a function to take one text + language into the lex format output
     // TOOD: then write a function to take a lex file and read it into the internal format

@@ -43,6 +43,17 @@ impl Language {
             Self::Example => crate::language::Example::normalise(text),
             // this happens only if Language is empty (no language feature enabled)
             // but in this case, Language is the bottom type anyways
+            #[allow(unreachable_patterns)]
+            _ => unreachable!(),
+        }
+    }
+}
+impl core::fmt::Display for Language {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        match self {
+            #[cfg(feature = "language_example")]
+            Self::Example => write!(f, "example"),
+            #[allow(unreachable_patterns)]
             _ => unreachable!(),
         }
     }
@@ -70,7 +81,25 @@ impl WordNormalForm {
         }
     }
 
-    pub fn display_form(self) -> String {
-        self.display_form
+    pub fn display_form(&self) -> &str {
+        &self.display_form
+    }
+
+    /// Render this word as part of a lex file presented to a human
+    /// 
+    /// as_block_nr and word_idx MUST be one-based
+    pub fn render_for_lex_file(&self, as_block_nr: usize, word_idx: usize) -> String {
+        let mut res = format!("[{as_block_nr}.word{word_idx}]\n");
+        res.push_str(&format!("display_form = \"{}\"\n", self.display_form));
+        if let Some(cmp_form) = &self.compare_form {
+            res.push_str(&format!("compare_form = \"{}\"\n", cmp_form));
+        };
+        // TODO: allow critic to automatically lex here
+        // instead define render_for_lex_file for a type which Option<Lex> and
+        // Option<Morph>, and if Some(x) is defined there, output the string representation
+        // instead of --TODO--
+        res.push_str("lex = \"--TODO--\"\n");
+        res.push_str("morph = \"--TODO--\"\n");
+        res
     }
 }

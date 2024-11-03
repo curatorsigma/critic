@@ -47,6 +47,16 @@ impl FromStr for AtgDialectList {
         }
     }
 }
+impl core::fmt::Display for AtgDialectList {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        match self {
+            #[cfg(feature = "atg_example")]
+            AtgDialectList::Example => { write!(f, "example") }
+            #[allow(unreachable_patterns)]
+            _ => unreachable!(),
+        }
+    }
+}
 
 pub fn parse_by_dialect_name(
     input: &str,

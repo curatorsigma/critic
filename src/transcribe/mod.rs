@@ -4,7 +4,7 @@ use critic_core::{
     anchor::AnchorDialect,
     atg::{AtgDialect, AtgParseError, Text},
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     dialect::{parse_by_dialect, AtgDialectList, AtgDialectUnknown},
@@ -14,7 +14,7 @@ use crate::{
 };
 
 /// Metadata associated to a single folio.
-#[derive(Deserialize, Debug, PartialEq, Eq, Clone)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub struct FolioTranscriptMetadata {
     /// Name of the principal transcriber of this folio
     transcriber: String,
@@ -298,9 +298,7 @@ impl FolioTranscript {
 
     /// Normalise all AtgBlocks in this Folio, creating a Vector over the different
     /// Corrections contained within.
-    pub fn normalise<D>(self) -> Vec<NormalisedFolioTranscript>
-    where
-        D: AtgDialect,
+    pub fn normalise(self) -> Vec<NormalisedFolioTranscript>
     {
         let metadata = self.metadata;
         // this is
@@ -309,7 +307,7 @@ impl FolioTranscript {
         let blocks = self
             .blocks
             .into_iter()
-            .map(|b| b.into_normalised_blocks::<D>().collect::<Vec<_>>())
+            .map(|b| b.into_normalised_blocks().collect::<Vec<_>>())
             .collect::<Vec<_>>();
         if blocks.is_empty() {
             return vec![NormalisedFolioTranscript::new(metadata, vec![])];
@@ -380,13 +378,11 @@ impl AtgBlock {
             .map(move |t| UniqueAtgBlock::new(t, language.clone(), atg_dialect.clone()))
     }
 
-    pub fn into_normalised_blocks<D>(self) -> impl Iterator<Item = NormalisedAtgBlock>
-    where
-        D: AtgDialect,
+    pub fn into_normalised_blocks(self) -> impl Iterator<Item = NormalisedAtgBlock>
     {
         let lang = self.language;
         self.into_unique_blocks()
-            .map(move |b| b.normalise::<D>(lang))
+            .map(move |b| b.normalise(lang))
     }
 }
 

@@ -2,8 +2,6 @@
 //!
 //! This module handles lexem-assignment and morphological tagging.
 
-use std::collections::HashMap;
-
 use critic_core::{anchor::Anchor, atg::Word};
 use serde::{Deserialize, Serialize};
 
@@ -179,9 +177,9 @@ where
 {
     /// The words in this block
     words: Vec<LexWord<L>>,
-    /// A map from the encountered Anchors to the index of the word immediately following that
+    /// A list of the encountered Anchors and the index of the word immediately following that
     /// anchor in [`words`](Self::words).
-    anchors: HashMap<Anchor, usize>,
+    anchors: Vec<(Anchor, usize)>,
 }
 
 /// A non-generic type containing the [InnerLexBlock] for each known language
@@ -319,6 +317,19 @@ impl LexWordData {
             morph,
         })
     }
+}
+
+struct LexMetadata {
+    lexer: String,
+    editors: Vec<String>,
+}
+
+/// A single Folio, with lex information added
+///
+/// This struct will be created once human-supplied lex data is added.
+struct LexedFolioTranscript {
+    metadata: LexMetadata,
+    blocks: Vec<LexBlock>,
 }
 
 #[cfg(test)]

@@ -3,9 +3,9 @@
 //! The main way to enter actual data is via flat files, which makes version tracking via git much
 //! simpler then it would be if data were immediately entered as SQL.
 
-use std::{fs::read_to_string, path::Path};
+use std::{io::Write, fs::{read_to_string, OpenOptions}, path::Path};
 
-use crate::transcribe::{FolioTranscript, FolioTranscriptParseError, WitnessMetadata};
+use crate::{normalise::NormalisedFolioTranscript, transcribe::{FolioTranscript, FolioTranscriptParseError, WitnessMetadata}};
 
 /// Error that can occur while reading a single folio file from disk
 #[derive(Debug)]
@@ -104,6 +104,15 @@ pub fn read_witness_metadata(path: &Path) -> Result<WitnessMetadata, ReadWitness
     let content = read_to_string(path)
         .map_err(|x| ReadWitnessDefinitionError::Io(x, path.to_string_lossy().to_string()))?;
     Ok(toml::from_str(&content)?)
+}
+
+pub fn output_lex_file(path: &Path, folio: NormalisedFolioTranscript) -> std::io::Result<()> {
+    let content = folio.render_lex_file();
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(path)?;
+    file.write_all(content.as_bytes())
 }
 
 #[cfg(test)]
