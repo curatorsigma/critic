@@ -52,10 +52,11 @@ pub fn parse_by_dialect_name(
     input: &str,
     name: &str,
     anchor_dialect: AnchorDialect,
+    number_of_corrections: usize,
 ) -> Option<Result<Text, AtgParseError>> {
     let dialect = name.parse();
     match &dialect {
-        Ok(x) => Some(parse_by_dialect(input, x, anchor_dialect)),
+        Ok(x) => Some(parse_by_dialect(input, x, anchor_dialect, number_of_corrections)),
         Err(_) => None,
     }
 }
@@ -64,11 +65,12 @@ pub fn parse_by_dialect(
     input: &str,
     atg_dialect: &AtgDialectList,
     anchor_dialect: AnchorDialect,
+    number_of_corrections: usize,
 ) -> Result<Text, AtgParseError> {
     match atg_dialect {
         #[cfg(feature = "atg_example")]
         AtgDialectList::Example => {
-            Text::parse::<crate::dialect::atg::ExampleAtgDialect>(input, anchor_dialect)
+            Text::parse::<crate::dialect::atg::ExampleAtgDialect>(input, anchor_dialect, number_of_corrections)
         }
         // this happens only if Language is empty (no language feature enabled)
         // but in this case, Language is the bottom type anyways

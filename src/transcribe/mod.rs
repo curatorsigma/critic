@@ -270,8 +270,9 @@ impl FolioTranscript {
                             reason: FolioTranscriptParseErrorReason::AtgDialectUnknown(x),
                         })?;
 
+                let number_of_corrections = witness_metadata.corrections.len();
                 let text =
-                    match parse_by_dialect(&trans_block.transcript, &atg_dialect, anchor_dialect) {
+                    match parse_by_dialect(&trans_block.transcript, &atg_dialect, anchor_dialect, number_of_corrections) {
                         Err(parse_error) => {
                             return Err(FolioTranscriptParseError {
                                 location: None,
@@ -316,7 +317,6 @@ impl FolioTranscript {
         // transpose these blocks to
         // - a vec over versions
         //   - a vec over blocks in this version
-        // TODO: das können wir in Zukunft über metadata rausfinden
         let correction_number = blocks[0].len();
         let mut block_iter: Vec<_> = blocks.into_iter().map(|n| n.into_iter()).collect();
         (0..correction_number)
@@ -325,7 +325,7 @@ impl FolioTranscript {
                     .iter_mut()
                     .map(|n| {
                         n.next()
-                            .expect("All Blocks should have equal number of corrections")
+                         .expect("All Blocks should have equal number of corrections because the parsing machinery asserts that.")
                     })
                     .collect::<Vec<_>>()
             })

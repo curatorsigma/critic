@@ -37,12 +37,6 @@ fn main() {
     let manual = lexworddata.to_toml_str();
     dbg!(&manual);
 
-    // TODO: add Version/Correction metadata to witness definition
-    // use this to create a new type of error in parsing when the number of corrections is not
-    // correct
-
-    // FolioTranscript -> Vec<NormalisedFolioTranscript>
-    // NormalisedFolioTranscript:: (metadata, Vec<NormalisedAtgBlock>)
     // serialization for NormalisedAtgBlock into lex files
 
     // LexBlockData + dialects -> LexBlock
