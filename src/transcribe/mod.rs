@@ -9,7 +9,8 @@ use serde::Deserialize;
 use crate::{
     dialect::{parse_by_dialect, AtgDialectList, AtgDialectUnknown},
     io::file::{read_witness_metadata, ReadWitnessDefinitionError, TranscriptIterator},
-    language::Language, normalise::UniqueAtgBlock,
+    language::Language,
+    normalise::UniqueAtgBlock,
 };
 
 /// Metadata associated to a single folio.
@@ -334,7 +335,9 @@ impl AtgBlock {
         let language = self.language;
         let atg_dialect = self.atg_dialect;
         let texts = self.text.into_unique_texts();
-        texts.into_iter().map(move |t| UniqueAtgBlock::new(t, language.clone(), atg_dialect.clone()))
+        texts
+            .into_iter()
+            .map(move |t| UniqueAtgBlock::new(t, language.clone(), atg_dialect.clone()))
     }
 }
 

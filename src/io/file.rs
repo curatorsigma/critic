@@ -114,7 +114,7 @@ mod test {
 
     use crate::{
         io::file::read_folio_transcript,
-        transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata, WitnessMetadata},
+        transcribe::{AtgBlock, FolioTranscript, FolioTranscriptMetadata},
     };
 
     use super::read_witness_metadata;

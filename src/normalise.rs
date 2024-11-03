@@ -7,9 +7,16 @@
 
 use std::collections::HashMap;
 
-use critic_core::{anchor::Anchor, atg::{AtgDialect, Text, UniqueText}};
+use critic_core::{
+    anchor::Anchor,
+    atg::{AtgDialect, Text, UniqueText},
+};
 
-use crate::{dialect::AtgDialectList, language::{Language, WordNormalForm}, transcribe::AtgBlock};
+use crate::{
+    dialect::AtgDialectList,
+    language::{Language, WordNormalForm},
+    transcribe::AtgBlock,
+};
 
 pub fn normalise<D>(text: Text, language: Language) -> Vec<Vec<WordNormalForm>>
 where
@@ -47,7 +54,9 @@ pub struct UniqueAtgBlock {
 impl UniqueAtgBlock {
     pub fn new(text: UniqueText, language: Language, atg_dialect: AtgDialectList) -> Self {
         Self {
-            text, language, atg_dialect,
+            text,
+            language,
+            atg_dialect,
         }
     }
 

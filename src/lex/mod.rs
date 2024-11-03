@@ -2,11 +2,10 @@
 //!
 //! This module handles lexem-assignment and morphological tagging.
 
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
 use critic_core::{anchor::Anchor, atg::Word};
 use serde::{Deserialize, Serialize};
-use toml::Table;
 
 use crate::language::{Example, SuperLanguage, WordNormalForm};
 
@@ -258,9 +257,19 @@ pub struct LexWordData {
     morph: String,
 }
 impl LexWordData {
-    pub fn new(surface_form: Word, display_form: String, compare_form: Option<String>, lexeme_id: String, morph: String) -> Self {
+    pub fn new(
+        surface_form: Word,
+        display_form: String,
+        compare_form: Option<String>,
+        lexeme_id: String,
+        morph: String,
+    ) -> Self {
         Self {
-            surface_form, display_form, compare_form, lexeme_id, morph,
+            surface_form,
+            display_form,
+            compare_form,
+            lexeme_id,
+            morph,
         }
     }
 
@@ -312,9 +321,6 @@ impl LexWordData {
     }
 }
 
-
-
-
 #[cfg(test)]
 mod test {
     use critic_core::atg::Word;
@@ -325,7 +331,13 @@ mod test {
     #[test]
     fn ser_de_lex_word_data() {
         let word: Word = toml::de::from_str("[[parts]]\nNative = \"some\"\n").unwrap();
-        let lexworddata = LexWordData::new(word.clone(), "some".to_owned(), None, "1".to_owned(), "N".to_owned());
+        let lexworddata = LexWordData::new(
+            word.clone(),
+            "some".to_owned(),
+            None,
+            "1".to_owned(),
+            "N".to_owned(),
+        );
         let ser = lexworddata.to_toml_str();
         let deser: LexWordDataHumanReadable = toml::from_str(&ser).unwrap();
         let enriched = deser.enrich_to_lex_word_data(word);

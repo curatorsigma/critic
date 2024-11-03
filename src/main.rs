@@ -24,7 +24,13 @@ fn main() {
     // let input = r#""#;
     let word: Word = toml::de::from_str("[[parts]]\nNative = \"some\"\n").unwrap();
     dbg!(&word);
-    let lexworddata = LexWordData::new(word, "some".to_owned(), None, "1".to_owned(), "N".to_owned());
+    let lexworddata = LexWordData::new(
+        word,
+        "some".to_owned(),
+        None,
+        "1".to_owned(),
+        "N".to_owned(),
+    );
     dbg!(&lexworddata);
     let straight = toml::to_string(&lexworddata);
     dbg!(&straight);

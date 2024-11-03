@@ -2,9 +2,12 @@
 
 use std::str::FromStr;
 
-use critic_core::atg::{AnchoredNormalisedText, Word};
+use critic_core::atg::AnchoredNormalisedText;
 
-use crate::lex::{LexParseError, LexSchema, MorphPointParseError, MorphPointSchema, MorphRangeParseError, MorphRangeSchema};
+use crate::lex::{
+    LexParseError, LexSchema, MorphPointParseError, MorphPointSchema, MorphRangeParseError,
+    MorphRangeSchema,
+};
 
 use super::{SuperLanguage, WordNormalForm};
 
@@ -20,7 +23,9 @@ impl core::fmt::Display for ExampleLex {
 impl FromStr for ExampleLex {
     type Err = LexParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let id = s.parse::<u16>().map_err(|_| LexParseError::new(0, "Not a Number.".to_owned()))?;
+        let id = s
+            .parse::<u16>()
+            .map_err(|_| LexParseError::new(0, "Not a Number.".to_owned()))?;
         Ok(Self { id })
     }
 }
@@ -61,7 +66,7 @@ pub enum ExampleMorphRange {
     None,
     Verb,
     Noun,
-    Both
+    Both,
 }
 impl core::fmt::Display for ExampleMorphRange {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
