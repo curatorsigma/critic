@@ -4,10 +4,13 @@ use std::str::FromStr;
 
 use critic_core::atg::AnchoredNormalisedText;
 
-use crate::{lex::{
-    LexParseError, LexSchema, MorphPointParseError, MorphPointSchema, MorphRangeParseError,
-    MorphRangeSchema,
-}, normalise::NonAgnosticAnchoredText};
+use crate::{
+    lex::{
+        LexParseError, LexSchema, MorphPointParseError, MorphPointSchema, MorphRangeParseError,
+        MorphRangeSchema,
+    },
+    normalise::NonAgnosticAnchoredText,
+};
 
 use super::{SuperLanguage, WordNormalForm};
 
@@ -115,7 +118,8 @@ impl SuperLanguage for Example {
                 .into_iter()
                 .map(|(w, s)| WordNormalForm::new(w, s, None))
                 .collect::<Vec<_>>(),
-            input.anchor_positions)
+            input.anchor_positions,
+        )
     }
 }
 

@@ -6,7 +6,10 @@ use serde::Deserialize;
 mod example;
 pub use example::Example;
 
-use crate::{lex::{LexSchema, MorphPointSchema}, normalise::NonAgnosticAnchoredText};
+use crate::{
+    lex::{LexSchema, MorphPointSchema},
+    normalise::NonAgnosticAnchoredText,
+};
 
 pub trait SuperLanguage {
     type Morph: MorphPointSchema;

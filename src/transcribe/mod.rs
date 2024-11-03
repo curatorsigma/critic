@@ -298,15 +298,20 @@ impl FolioTranscript {
     /// Normalise all AtgBlocks in this Folio, creating a Vector over the different
     /// Corrections contained within.
     pub fn normalise<D>(self) -> Vec<NormalisedFolioTranscript>
-        where D: AtgDialect,
+    where
+        D: AtgDialect,
     {
         let metadata = self.metadata;
         // this is
         // - a vec over blocks
         //   - a vec over versions in that block
-        let blocks = self.blocks.into_iter().map(|b| b.into_normalised_blocks::<D>().collect::<Vec<_>>()).collect::<Vec<_>>();
+        let blocks = self
+            .blocks
+            .into_iter()
+            .map(|b| b.into_normalised_blocks::<D>().collect::<Vec<_>>())
+            .collect::<Vec<_>>();
         if blocks.is_empty() {
-            return vec![ NormalisedFolioTranscript::new(metadata, vec![])];
+            return vec![NormalisedFolioTranscript::new(metadata, vec![])];
         };
         // transpose these blocks to
         // - a vec over versions
@@ -318,10 +323,15 @@ impl FolioTranscript {
             .map(|_| {
                 block_iter
                     .iter_mut()
-                    .map(|n| n.next().expect("All Blocks should have equal number of corrections"))
+                    .map(|n| {
+                        n.next()
+                            .expect("All Blocks should have equal number of corrections")
+                    })
                     .collect::<Vec<_>>()
             })
-            .map(|blocks_of_correction| NormalisedFolioTranscript::new(metadata.clone(), blocks_of_correction))
+            .map(|blocks_of_correction| {
+                NormalisedFolioTranscript::new(metadata.clone(), blocks_of_correction)
+            })
             .collect()
     }
 }
@@ -370,12 +380,13 @@ impl AtgBlock {
             .map(move |t| UniqueAtgBlock::new(t, language.clone(), atg_dialect.clone()))
     }
 
-
     pub fn into_normalised_blocks<D>(self) -> impl Iterator<Item = NormalisedAtgBlock>
-    where D: AtgDialect,
+    where
+        D: AtgDialect,
     {
         let lang = self.language;
-        self.into_unique_blocks().map(move |b| { b.normalise::<D>(lang) })
+        self.into_unique_blocks()
+            .map(move |b| b.normalise::<D>(lang))
     }
 }
 
