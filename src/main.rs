@@ -25,10 +25,6 @@ fn main() {
     dbg!(&write_to_file);
 
     // TODO:
-    // Add punctuation to critic core
-    // - they break words and behave as words on their own (normal token)
-
-    // TODO:
     // - merge critic_core into critic
 
     // TODO:
@@ -43,7 +39,10 @@ fn main() {
     //   we have to faithfully represent each folio that means we will have partial words on some
     //   occasions. We can ignore them while reading the filled lex file back
 
-    // Add expandability to have the lex output make proposals for lex and morph data
+
+    // TODO:
+    // - Add expandability to have the lex output make proposals for lex and morph data
+    // - automatically suggest the lex and morph for punctuation
 
     // TODO: reading lex files from disk into a LexedFolioTranscript
 
