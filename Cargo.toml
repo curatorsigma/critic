@@ -27,4 +27,4 @@ language_example = []
 [dependencies]
 critic-core = { git = "https://github.com/curatorsigma/critic-core.git" }
 serde = { version = "1.0.213", features = ["derive"] }
-toml = "0.8.19"
+toml = { version = "0.8.19", features = ["preserve_order"] }

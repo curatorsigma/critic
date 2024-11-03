@@ -295,10 +295,14 @@ impl FolioTranscript {
     }
 }
 
+/// A single block of ATG, together with the language and ATG dialect
 #[derive(Deserialize, Debug, PartialEq, Eq)]
 pub struct AtgBlock {
+    /// the actual text in this block
     text: Text,
+    /// the language used in this block
     language: Language,
+    /// the atg dialect used in this block
     atg_dialect: AtgDialectList,
 }
 impl AtgBlock {

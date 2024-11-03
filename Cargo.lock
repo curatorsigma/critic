@@ -14,7 +14,7 @@ dependencies = [
 [[package]]
 name = "critic-core"
 version = "0.1.0"
-source = "git+https://github.com/curatorsigma/critic-core.git#ca408317f95f4db99fdc7c1b869963dec5e37ab0"
+source = "git+https://github.com/curatorsigma/critic-core.git#0d24a57c2b596c7958e224fc5b71f4445daa113d"
 dependencies = [
  "serde",
 ]
@@ -96,9 +96,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.85"
+version = "2.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5023162dfcd14ef8f32034d8bcd4cc5ddc61ef7a247c024a33e24e1f24d21b56"
+checksum = "25aa4ce346d03a6dcd68dd8b4010bcb74e54e62c90c573f394c46eae99aba32d"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -111,6 +111,7 @@ version = "0.8.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1ed1f98e3fdc28d6d910e6737ae6ab1a93bf1985935a1193e68f93eeb68d24e"
 dependencies = [
+ "indexmap",
  "serde",
  "serde_spanned",
  "toml_datetime",

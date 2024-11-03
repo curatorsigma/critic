@@ -5,7 +5,8 @@
 use std::{collections::HashMap, str::FromStr};
 
 use critic_core::{anchor::Anchor, atg::Word};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use toml::Table;
 
 use crate::language::{Example, SuperLanguage, WordNormalForm};
 
@@ -163,7 +164,7 @@ pub trait MorphRangeSchema:
 
 /// A single lexed word
 #[derive(Debug)]
-struct LexWord<L>
+pub struct LexWord<L>
 where
     L: SuperLanguage,
 {
@@ -172,21 +173,27 @@ where
     morph: L::Morph,
 }
 
+/// A single block of text in a lex file, generic over the language
 struct InnerLexBlock<L>
 where
     L: SuperLanguage,
 {
-    versions: Vec<LexWord<L>>,
+    /// The words in this block
+    words: Vec<LexWord<L>>,
+    /// A map from the encountered Anchors to the index of the word immediately following that
+    /// anchor in [`words`](Self::words).
     anchors: HashMap<Anchor, usize>,
 }
 
+/// A non-generic type containing the [InnerLexBlock] for each known language
 enum LexBlock {
     #[cfg(feature = "language_example")]
-    Example(InnerLexBlock<Example>),
+    Example(Vec<InnerLexBlock<Example>>),
 }
 
+/// An error that can occur while parsing the morph and lex information contained in a [LexWordData]
 #[derive(Debug)]
-enum IntoLexWordError {
+pub enum IntoLexWordError {
     LexParsing(LexParseError),
     MorphParsing(MorphPointParseError),
 }
@@ -210,8 +217,40 @@ impl From<MorphPointParseError> for IntoLexWordError {
     }
 }
 
-#[derive(Debug, Deserialize)]
-struct LexWordData {
+/// This struct is used only when serializing LexWordData
+#[derive(Serialize)]
+struct Helper {
+    surface_form: Word,
+}
+
+/// The data for a single word as presented to humans in lex files
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct LexWordDataHumanReadable {
+    display_form: String,
+    compare_form: Option<String>,
+    lexeme_id: String,
+    morph: String,
+}
+impl LexWordDataHumanReadable {
+    /// Add a surface form
+    ///
+    /// The surface form is not output into the human readable lex file, because its structure is
+    /// unnecessarily complicated (and its content is also unnecessary while manually lexing).
+    /// This function is then used to add the surface form back in.
+    pub fn enrich_to_lex_word_data(self, surface_form: Word) -> LexWordData {
+        LexWordData {
+            surface_form,
+            display_form: self.display_form,
+            compare_form: self.compare_form,
+            lexeme_id: self.lexeme_id,
+            morph: self.morph,
+        }
+    }
+}
+
+/// The full data for a single word before Lex and Morph are parsed
+#[derive(Debug, Deserialize, Serialize, PartialEq, Eq)]
+pub struct LexWordData {
     surface_form: Word,
     display_form: String,
     compare_form: Option<String>,
@@ -219,6 +258,45 @@ struct LexWordData {
     morph: String,
 }
 impl LexWordData {
+    pub fn new(surface_form: Word, display_form: String, compare_form: Option<String>, lexeme_id: String, morph: String) -> Self {
+        Self {
+            surface_form, display_form, compare_form, lexeme_id, morph,
+        }
+    }
+
+    /// Output this [LexWordData] in the format used for lex files
+    ///
+    /// Note that this function is NOT a pseudo-inverse to Deserialization and is NOT equivalent to
+    /// Serialization.
+    /// Instead, this function creates the output that will be presented to humans while lexing.
+    ///
+    /// When the output is parsed as [LexWordDataHumanReadable] and enriced with the correct word via
+    /// [LexWordDataHumanReadable::enrich_to_lex_word_data], you get the same word back.
+    pub fn to_toml_str(&self) -> String {
+        let mut res = String::new();
+
+        res.push_str(&"display_form = \"");
+        res.push_str(&self.display_form);
+        res.push_str("\"\n");
+
+        if let Some(cmp_form) = &self.compare_form {
+            res.push_str(&"compare_form = \"");
+            res.push_str(cmp_form);
+            res.push_str("\"\n");
+        };
+
+        res.push_str(&"lexeme_id = \"");
+        res.push_str(&self.lexeme_id);
+        res.push_str("\"\n");
+
+        res.push_str(&"morph = \"");
+        res.push_str(&self.morph);
+        res.push_str("\"\n");
+
+        res
+    }
+
+    /// Try to parse the user supplied lex and morph data into their internal representation
     pub fn into_lex_word<L>(self) -> Result<LexWord<L>, IntoLexWordError>
     where
         L: SuperLanguage,
@@ -231,5 +309,26 @@ impl LexWordData {
             lexeme_id,
             morph,
         })
+    }
+}
+
+
+
+
+#[cfg(test)]
+mod test {
+    use critic_core::atg::Word;
+
+    use crate::lex::{LexWordData, LexWordDataHumanReadable};
+
+    /// Ensure that Serialization and Deserialization for [LexWordData] work as intended
+    #[test]
+    fn ser_de_lex_word_data() {
+        let word: Word = toml::de::from_str("[[parts]]\nNative = \"some\"\n").unwrap();
+        let lexworddata = LexWordData::new(word.clone(), "some".to_owned(), None, "1".to_owned(), "N".to_owned());
+        let ser = lexworddata.to_toml_str();
+        let deser: LexWordDataHumanReadable = toml::from_str(&ser).unwrap();
+        let enriched = deser.enrich_to_lex_word_data(word);
+        assert_eq!(enriched, lexworddata);
     }
 }
