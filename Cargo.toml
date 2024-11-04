@@ -27,3 +27,8 @@ language_example = []
 [dependencies]
 serde = { version = "1.0.213", features = ["derive"] }
 toml = { version = "0.8.19", features = ["preserve_order"] }
+
+[[example]]
+name = "01_basic_atg"
+required-features = ["anchor_example"]
+
