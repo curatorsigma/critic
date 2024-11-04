@@ -10,9 +10,6 @@ TODO
 TODO
 
 # Structure of the source code
-- `critic` builds uppon [`critic-core`](https://github.com/curatorsigma/critic-core), which defines low-level language agnostic functions like ATG parsing.
-- All aspects of individual languages are defined in `dialect`. The languages you want can be added by compiling `critic` with the appropriate cargo features.
-
 TODO: other parts of the source
 
 # Contributing

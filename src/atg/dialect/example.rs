@@ -1,5 +1,6 @@
-//! An example ATG-Dialect
-use critic_core::atg::{AtgDialect, ControlPointDefinition};
+//! Example ATG dialect
+
+use crate::atg::{AtgDialect, ControlPointDefinition};
 
 const EXAMPLE_CONTROL_POINTS: ControlPointDefinition = ControlPointDefinition {
     escape: '\\',
@@ -14,7 +15,6 @@ const EXAMPLE_CONTROL_POINTS: ControlPointDefinition = ControlPointDefinition {
     comment: '#',
 };
 
-#[allow(dead_code)]
 pub struct ExampleAtgDialect {}
 impl AtgDialect for ExampleAtgDialect {
     const NATIVE_POINTS: &'static str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.'";
@@ -22,3 +22,4 @@ impl AtgDialect for ExampleAtgDialect {
     const ATG_CONTROL_POINTS: ControlPointDefinition = EXAMPLE_CONTROL_POINTS;
     const WORD_DIVISOR: char = ' ';
 }
+

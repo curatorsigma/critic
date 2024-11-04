@@ -1,10 +1,9 @@
-//! An example anchor dialect.
-use core::str::FromStr;
+//! An example Anchor Dialect
 
-use critic_core::anchor::SuperAnchorDialect;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq)]
-enum ParseStanzaError {
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
+pub enum ParseStanzaError {
     EmptyString,
     TooManyChars,
     NotInRange,
@@ -22,12 +21,12 @@ impl core::fmt::Display for ParseStanzaError {
 }
 impl std::error::Error for ParseStanzaError {}
 
-#[derive(Debug, PartialEq)]
-enum Stanza {
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Copy, Hash)]
+pub enum Example {
     One,
     Two,
 }
-impl core::fmt::Display for Stanza {
+impl core::fmt::Display for Example {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         match self {
             Self::One => {
@@ -39,7 +38,7 @@ impl core::fmt::Display for Stanza {
         }
     }
 }
-impl FromStr for Stanza {
+impl core::str::FromStr for Example {
     type Err = ParseStanzaError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.is_empty() {
@@ -49,13 +48,14 @@ impl FromStr for Stanza {
         } else {
             let nr = s.parse::<u8>().map_err(|_| ParseStanzaError::NotANumber)?;
             match nr {
-                1 => Ok(Stanza::One),
-                2 => Ok(Stanza::Two),
+                1 => Ok(Example::One),
+                2 => Ok(Example::Two),
                 _ => Err(ParseStanzaError::NotInRange),
             }
         }
     }
 }
-impl SuperAnchorDialect for Stanza {
+impl super::SuperAnchorDialect for Example {
     type ParseError = ParseStanzaError;
 }
+

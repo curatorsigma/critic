@@ -6,17 +6,8 @@ version = 3
 name = "critic"
 version = "0.1.0"
 dependencies = [
- "critic-core",
  "serde",
  "toml",
-]
-
-[[package]]
-name = "critic-core"
-version = "0.1.0"
-source = "git+https://github.com/curatorsigma/critic-core.git#ba41ce156df7ea69352069b022d10021ba174731"
-dependencies = [
- "serde",
 ]
 
 [[package]]

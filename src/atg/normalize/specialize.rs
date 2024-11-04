@@ -1,23 +1,56 @@
-//! Everything dealing with the normalisation of the surface form of texts
-//!
-//! The normalisation part of the pipeline does these things:
-//! - split texts into words (based on the word divisor)
-//! - supply uncertain passages
-//! - do other normalisations like nomina-sacra expansion or unicode-mapping for each language
-
-use critic_core::{
-    anchor::Anchor,
-    atg::{AtgDialect, UniqueText},
-};
-
-use crate::{
-    dialect::AtgDialectList,
-    language::{Language, WordNormalForm},
-    transcribe::FolioTranscriptMetadata,
-};
+//! Normalize a tokenized ATG stream dependent on a specific Language
 
 #[cfg(feature = "atg_example")]
-use crate::dialect::atg::ExampleAtgDialect;
+use crate::atg::dialect::ExampleAtgDialect;
+use crate::{anchor::Anchor, atg::{dialect::AtgDialectList, AtgBlock, AtgDialect, Word}, language::Language, transcribe::FolioTranscriptMetadata};
+
+use super::flatten::UniqueAtgBlock;
+
+/// Normal form of a word
+#[derive(Debug)]
+pub struct WordNormalForm {
+    annotated_form: Word,
+    /// Form used for displaying the word when displayed without ATG annotations
+    display_form: String,
+    /// Form for comparing this word to other words
+    ///
+    /// This is mainly useful for languages which have skeletal forms which naturally compare,
+    /// while the display forms vary.
+    /// When not given, comparison will happen on the display_form itself.
+    compare_form: Option<String>,
+}
+impl WordNormalForm {
+    pub fn new(annotated_form: Word, display_form: String, compare_form: Option<String>) -> Self {
+        Self {
+            annotated_form,
+            display_form,
+            compare_form,
+        }
+    }
+
+    pub fn display_form(&self) -> &str {
+        &self.display_form
+    }
+
+    /// Render this word as part of a lex file presented to a human
+    /// 
+    /// as_block_nr and word_idx MUST be one-based
+    pub fn render_for_lex_file(&self, as_block_nr: usize, word_idx: usize) -> String {
+        let mut res = format!("[{as_block_nr}.word{word_idx}]\n");
+        res.push_str(&format!("display_form = \"{}\"\n", self.display_form));
+        if let Some(cmp_form) = &self.compare_form {
+            res.push_str(&format!("compare_form = \"{}\"\n", cmp_form));
+        };
+        // TODO: allow critic to automatically lex here
+        // instead define render_for_lex_file for a type which Option<Lex> and
+        // Option<Morph>, and if Some(x) is defined there, output the string representation
+        // instead of --TODO--
+        res.push_str("lex = \"--TODO--\"\n");
+        res.push_str("morph = \"--TODO--\"\n");
+        res
+    }
+}
+
 
 /// A text which was normalised with the method relying on the language
 #[derive(Debug)]
@@ -100,27 +133,7 @@ impl NormalisedAtgBlock {
         res
     }
 }
-
-/// A block of ATG text without corrections
-pub struct UniqueAtgBlock {
-    /// The text in this Block
-    ///
-    /// It does not have Corrections in it.
-    text: UniqueText,
-    /// the language used in this block
-    language: Language,
-    /// the atg dialect used in this block
-    atg_dialect: AtgDialectList,
-}
 impl UniqueAtgBlock {
-    pub fn new(text: UniqueText, language: Language, atg_dialect: AtgDialectList) -> Self {
-        Self {
-            text,
-            language,
-            atg_dialect,
-        }
-    }
-
     pub fn normalise(self, language: Language) -> NormalisedAtgBlock {
         match self.atg_dialect {
             #[cfg(feature = "atg_example")]
@@ -146,26 +159,12 @@ impl UniqueAtgBlock {
     }
 }
 
-/// A transcribed Folio,
-#[derive(Debug)]
-pub struct NormalisedFolioTranscript {
-    metadata: FolioTranscriptMetadata,
-    blocks: Vec<NormalisedAtgBlock>,
-}
-impl NormalisedFolioTranscript {
-    pub fn new(metadata: FolioTranscriptMetadata, blocks: Vec<NormalisedAtgBlock>) -> Self {
-        Self { metadata, blocks }
-    }
-
-    /// Render the lex file shown to a human to add lex and morph information
-    pub fn render_lex_file(&self) -> String {
-        // render the metadata block
-        let mut res = toml::to_string(&self.metadata).expect("Statically infallible Serialization");
-        res.push('\n');
-        // render the other blocks
-        for (idx, block) in self.blocks.iter().enumerate() {
-            res.push_str(&block.render_for_lex_file(idx + 1));
-        };
-        res
+impl AtgBlock {
+    /// Do the entire noramlisation, including specialization
+    pub fn into_normalised_blocks(self) -> impl Iterator<Item = NormalisedAtgBlock>
+    {
+        let lang = self.language;
+        self.into_unique_blocks()
+            .map(move |b| b.normalise(lang))
     }
 }

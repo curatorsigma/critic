@@ -19,12 +19,11 @@ atg_example = []
 # All the anchor styles available for works to use.
 # They are actually compiled in critic-core, so we have to simply redirect the dependency there.
 anchor_all = ["anchor_example"]
-anchor_example = ["critic-core/anchor_example"]
+anchor_example = []
 
 language_all = ["language_example"]
 language_example = []
 
 [dependencies]
-critic-core = { git = "https://github.com/curatorsigma/critic-core.git" }
 serde = { version = "1.0.213", features = ["derive"] }
 toml = { version = "0.8.19", features = ["preserve_order"] }

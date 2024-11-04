@@ -2,17 +2,7 @@
 
 use std::str::FromStr;
 
-use critic_core::atg::AnchoredNormalisedText;
-
-use crate::{
-    lex::{
-        LexParseError, LexSchema, MorphPointParseError, MorphPointSchema, MorphRangeParseError,
-        MorphRangeSchema,
-    },
-    normalise::NonAgnosticAnchoredText,
-};
-
-use super::{SuperLanguage, WordNormalForm};
+use crate::{atg::normalize::{AnchoredNormalisedText, NonAgnosticAnchoredText, WordNormalForm}, language::{lex::{LexParseError, LexSchema}, morph::{MorphPointParseError, MorphRangeParseError}, MorphPointSchema, MorphRangeSchema, SuperLanguage}};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ExampleLex {
@@ -125,18 +115,17 @@ impl SuperLanguage for Example {
 
 #[cfg(test)]
 mod test {
-    use critic_core::atg::Text;
-
     #[test]
     #[cfg(all(feature = "language_example", feature = "atg_example"))]
     fn normalise_example() {
-        use crate::dialect::atg::ExampleAtgDialect;
+        use crate::atg::{dialect::ExampleAtgDialect, Text};
 
         let input = "This &(word)(sword) ~(3)^(2)(st)rong.";
         let parsed =
-            Text::parse::<ExampleAtgDialect>(input, critic_core::anchor::AnchorDialect::Example, 2)
+            Text::parse::<ExampleAtgDialect>(input, crate::anchor::AnchorDialect::Example, 2)
                 .unwrap();
         let normalised = parsed.auto_normalise::<ExampleAtgDialect>().collect::<Vec<_>>();
         assert_eq!(normalised.len(), 2);
     }
 }
+

@@ -1,8 +1,6 @@
-//! An example ATG-Dialect
 use std::str::FromStr;
 
-use critic_core::anchor::AnchorDialect;
-use critic_core::atg::{AtgDialect, ControlPointDefinition};
+use critic::{anchor::{AnchorDialect, SuperAnchorDialect}, atg::{AtgDialect, ControlPointDefinition, Text}};
 
 const EXAMPLE_CONTROL_POINTS: ControlPointDefinition = ControlPointDefinition {
     escape: '\\',
@@ -17,10 +15,10 @@ const EXAMPLE_CONTROL_POINTS: ControlPointDefinition = ControlPointDefinition {
     comment: '#',
 };
 
-#[allow(dead_code)]
 struct ExampleAtgDialect {}
 impl AtgDialect for ExampleAtgDialect {
     const NATIVE_POINTS: &'static str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,.'";
+    const PUNCTUATION: &'static str = ",.";
     const ATG_CONTROL_POINTS: ControlPointDefinition = EXAMPLE_CONTROL_POINTS;
     const WORD_DIVISOR: char = ' ';
 }
@@ -81,3 +79,21 @@ impl FromStr for Stanza {
 impl SuperAnchorDialect for Stanza {
     type ParseError = ParseStanzaError;
 }
+
+fn main() {
+    let res = "§(1)\
+    In twilight's glow, the sha^(2)(do)ws dance,/(line)\
+    Whispers of dre^(1)(a)ms in a fleeting trance,/(line)\
+    Stars awaken^(1)(,) the night unfurls,/(line)\
+    A canvas painted with secret pearls./(paragraph)\
+    §(2)\
+    The moonlight &(illuminates)(bathes) the quiet stream,/(line)\
+    Where echoes linger of a distant dream,/(line)\
+    Soft breezes carry the ta~(8)ld,/(line)\
+    Of hearts entwined and lo~(8)d./(folio)\
+    ";
+    let parsed =
+        Text::parse::<ExampleAtgDialect>(res, AnchorDialect::Example, 2).unwrap();
+    assert_eq!(parsed.render::<ExampleAtgDialect>(), res);
+}
+
