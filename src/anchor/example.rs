@@ -58,4 +58,3 @@ impl core::str::FromStr for Example {
 impl super::SuperAnchorDialect for Example {
     type ParseError = ParseStanzaError;
 }
-

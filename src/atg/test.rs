@@ -3,6 +3,8 @@ use std::str::FromStr;
 
 use crate::anchor::SuperAnchorDialect;
 
+use crate::atg::dialect::ExampleAtgDialect;
+
 use super::*;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
@@ -81,8 +83,6 @@ fn known_good_stanza() {
 #[test]
 #[cfg(feature = "anchor_example")]
 fn render_text() {
-    use crate::atg::dialect::ExampleAtgDialect;
-
     let res = "§(1)\
     In twilight's glow, the sha^(2)(do)ws dance,/(line)\
     Whispers of dre^(1)(a)ms in a fleeting trance,/(line)\

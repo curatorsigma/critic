@@ -2,9 +2,10 @@
 
 use std::{fs::read_to_string, path::Path};
 
-use serde::Deserialize;
-
-use crate::{atg::{dialect::{AtgDialectList, AtgDialectUnknown}, normalize::UniqueText, AtgParseError, Text}, define::WitnessMetadata, language::Language};
+use crate::{
+    atg::{dialect::AtgDialectUnknown, AtgParseError},
+    define::WitnessMetadata,
+};
 
 use super::FolioTranscript;
 
@@ -45,7 +46,7 @@ pub struct FolioTranscriptParseError {
 }
 impl FolioTranscriptParseError {
     pub fn new(reason: FolioTranscriptParseErrorReason, location: Option<usize>) -> Self {
-        Self { reason, location, }
+        Self { reason, location }
     }
 }
 impl core::fmt::Display for FolioTranscriptParseError {
@@ -184,5 +185,3 @@ pub fn read_folio_transcript(
         .map_err(|x| ReadFolioTranscriptError::Io(x, path.to_string_lossy().to_string()))?;
     Ok(FolioTranscript::from_folio_file_content(&content, meta)?)
 }
-
-

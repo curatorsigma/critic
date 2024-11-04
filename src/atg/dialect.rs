@@ -49,7 +49,9 @@ impl core::fmt::Display for AtgDialectList {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         match self {
             #[cfg(feature = "atg_example")]
-            AtgDialectList::Example => { write!(f, "example") }
+            AtgDialectList::Example => {
+                write!(f, "example")
+            }
             #[allow(unreachable_patterns)]
             _ => unreachable!(),
         }
@@ -69,6 +71,7 @@ pub fn parse_by_dialect(
         }
         // this happens only if Language is empty (no language feature enabled)
         // but in this case, Language is the bottom type anyways
+        #[allow(unreachable_patterns)]
         _ => unreachable!(),
     }
 }

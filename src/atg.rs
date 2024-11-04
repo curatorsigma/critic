@@ -12,9 +12,15 @@ use std::marker::PhantomData;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{anchor::{Anchor, AnchorDialect}, language::Language};
+use crate::{
+    anchor::{Anchor, AnchorDialect},
+    language::Language,
+};
 
-use self::{dialect::{AtgDialectList, AtgDialectUnknown, ExampleAtgDialect}, normalize::{AnchoredNormalisedText, NormalisedAtgBlock, UniqueText, Word}};
+use self::{
+    dialect::{AtgDialectList, AtgDialectUnknown},
+    normalize::{AnchoredNormalisedText, UniqueText, Word},
+};
 
 #[cfg(test)]
 mod test;
@@ -524,7 +530,6 @@ impl Text {
             .map(|x| x.split_words::<D>().into_anchored_normalised_text::<D>())
     }
 
-
     pub fn render<D>(&self) -> String
     where
         D: AtgDialect,
@@ -883,7 +888,7 @@ impl Present {
 // }
 /// Defines a part of a text that was corrected
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash)]
-struct Correction {
+pub struct Correction {
     /// The different versions of this corrected passage.
     ///
     /// Order specifies, which version belongs to which hand. This is defined per Manuscript.

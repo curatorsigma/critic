@@ -1,6 +1,9 @@
 use std::str::FromStr;
 
-use critic::{anchor::{AnchorDialect, SuperAnchorDialect}, atg::{AtgDialect, ControlPointDefinition, Text}};
+use critic::{
+    anchor::{AnchorDialect, SuperAnchorDialect},
+    atg::{AtgDialect, ControlPointDefinition, Text},
+};
 
 const EXAMPLE_CONTROL_POINTS: ControlPointDefinition = ControlPointDefinition {
     escape: '\\',
@@ -92,8 +95,6 @@ fn main() {
     Soft breezes carry the ta~(8)ld,/(line)\
     Of hearts entwined and lo~(8)d./(folio)\
     ";
-    let parsed =
-        Text::parse::<ExampleAtgDialect>(res, AnchorDialect::Example, 2).unwrap();
+    let parsed = Text::parse::<ExampleAtgDialect>(res, AnchorDialect::Example, 2).unwrap();
     assert_eq!(parsed.render::<ExampleAtgDialect>(), res);
 }
-

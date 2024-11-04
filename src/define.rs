@@ -79,4 +79,3 @@ impl Witness {
         TranscriptIterator::new(&self.metadata, base_dir)
     }
 }
-

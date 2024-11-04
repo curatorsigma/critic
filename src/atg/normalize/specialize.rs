@@ -2,7 +2,11 @@
 
 #[cfg(feature = "atg_example")]
 use crate::atg::dialect::ExampleAtgDialect;
-use crate::{anchor::Anchor, atg::{dialect::AtgDialectList, AtgBlock, AtgDialect, Word}, language::Language, transcribe::FolioTranscriptMetadata};
+use crate::{
+    anchor::Anchor,
+    atg::{dialect::AtgDialectList, AtgBlock, AtgDialect, Word},
+    language::Language,
+};
 
 use super::flatten::UniqueAtgBlock;
 
@@ -33,7 +37,7 @@ impl WordNormalForm {
     }
 
     /// Render this word as part of a lex file presented to a human
-    /// 
+    ///
     /// as_block_nr and word_idx MUST be one-based
     pub fn render_for_lex_file(&self, as_block_nr: usize, word_idx: usize) -> String {
         let mut res = format!("[{as_block_nr}.word{word_idx}]\n");
@@ -50,7 +54,6 @@ impl WordNormalForm {
         res
     }
 }
-
 
 /// A text which was normalised with the method relying on the language
 #[derive(Debug)]
@@ -90,12 +93,12 @@ impl NonAgnosticAnchoredText {
                 words_till_anchor.push_str(&word.render_for_lex_file(as_block_nr, word_idx + 1));
                 words_till_anchor.push('\n');
                 word_idx += 1;
-            };
+            }
             res.push('\n');
             res.push_str(&words_till_anchor);
             // print this anchor
             res.push_str(&format!("[anchor.{anchor}]\n"));
-        };
+        }
         // print the remaining words after the last anchor
         words_till_anchor.clear();
         res.push_str("# ");
@@ -106,7 +109,7 @@ impl NonAgnosticAnchoredText {
             words_till_anchor.push_str(&word.render_for_lex_file(as_block_nr, word_idx + 1));
             words_till_anchor.push('\n');
             word_idx += 1;
-        };
+        }
         res.push('\n');
         res.push_str(&words_till_anchor);
         res
@@ -138,6 +141,7 @@ impl UniqueAtgBlock {
         match self.atg_dialect {
             #[cfg(feature = "atg_example")]
             AtgDialectList::Example => self.inner_normalise::<ExampleAtgDialect>(language),
+            #[allow(unreachable_patterns)]
             _ => unreachable!(),
         }
     }
@@ -161,10 +165,8 @@ impl UniqueAtgBlock {
 
 impl AtgBlock {
     /// Do the entire noramlisation, including specialization
-    pub fn into_normalised_blocks(self) -> impl Iterator<Item = NormalisedAtgBlock>
-    {
+    pub fn into_normalised_blocks(self) -> impl Iterator<Item = NormalisedAtgBlock> {
         let lang = self.language;
-        self.into_unique_blocks()
-            .map(move |b| b.normalise(lang))
+        self.into_unique_blocks().map(move |b| b.normalise(lang))
     }
 }

@@ -1,13 +1,17 @@
 //! Flatten a Text with multiple corrections to several texts, one for each correcting hand
 
-use std::marker::PhantomData;
-
 use serde::{Deserialize, Serialize};
 
-use crate::{anchor::Anchor, atg::{dialect::AtgDialectList, AtgBlock, AtgDialect, FormatBreak, Illegible, Lacuna, Part, Present, Text, Uncertain}, language::Language};
+use crate::{
+    anchor::Anchor,
+    atg::{
+        dialect::AtgDialectList, AtgBlock, AtgDialect, FormatBreak, Illegible, Lacuna, Part,
+        Present, Text, Uncertain,
+    },
+    language::Language,
+};
 
 use super::UniqueSurfacePart;
-
 
 /// Split a [Text] into multiple [UniqueText], each corresponding to one correctors hand.
 impl From<Text> for Vec<UniqueText> {
@@ -68,9 +72,6 @@ impl From<Text> for Vec<UniqueText> {
         res
     }
 }
-
-
-
 
 /// Like [Part], but
 /// - No [Correction]s
@@ -136,7 +137,6 @@ impl From<UniqueSurfacePart> for UniquePart {
     }
 }
 
-
 /// Like [Text], but
 /// - No [Correction]s
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, Hash)]
@@ -151,7 +151,6 @@ impl UniqueText {
     fn add_part(&mut self, p: UniquePart) {
         self.parts.push(p);
     }
-
 }
 
 /// A block of ATG text without corrections

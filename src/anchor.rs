@@ -103,7 +103,7 @@ impl core::fmt::Display for Anchor {
             Self::Example(x) => {
                 write!(f, "{x}")
             }
-            #[cfg_attr(feature = "anchor_example", allow(unreachable_patterns))]
+            #[allow(unreachable_patterns)]
             _ => unreachable!(),
         }
     }
@@ -137,7 +137,7 @@ impl AnchorDialect {
         match self {
             #[cfg(feature = "anchor_example")]
             Self::Example => Ok(Anchor::Example(s.parse::<example::Example>()?)),
-            #[cfg_attr(feature = "anchor_example", allow(unreachable_patterns))]
+            #[allow(unreachable_patterns)]
             _ => unreachable!(),
         }
     }

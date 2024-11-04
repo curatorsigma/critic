@@ -6,8 +6,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{anchor::Anchor, atg::Uncertain};
 
-use super::{flatten::{UniquePart, UniqueText}, AtgDialect, UniqueSurfacePart, Word};
-
+use super::{
+    flatten::{UniquePart, UniqueText},
+    AtgDialect, UniqueSurfacePart, Word,
+};
 
 #[derive(Serialize, Deserialize, Debug)]
 struct BoundedWordChain {
@@ -17,7 +19,8 @@ struct BoundedWordChain {
 }
 
 struct WordSplitIterator<'a, D>
-where D: AtgDialect,
+where
+    D: AtgDialect,
 {
     original: &'a str,
     /// the index, if the last char was a punctuation
@@ -27,7 +30,8 @@ where D: AtgDialect,
     _dialect: PhantomData<D>,
 }
 impl<'a, D> WordSplitIterator<'a, D>
-where D: AtgDialect,
+where
+    D: AtgDialect,
 {
     pub fn new(s: &'a str) -> WordSplitIterator<'a, D> {
         Self {
@@ -40,7 +44,10 @@ where D: AtgDialect,
 }
 /// The first return is the substring
 /// the second return is true iff that substrings last character ends a word
-impl<'a, D> Iterator for WordSplitIterator<'a, D> where D: AtgDialect, {
+impl<'a, D> Iterator for WordSplitIterator<'a, D>
+where
+    D: AtgDialect,
+{
     type Item = (&'a str, bool);
     fn next(&mut self) -> Option<Self::Item> {
         match self.last_char_was_punctuation {
@@ -50,7 +57,10 @@ impl<'a, D> Iterator for WordSplitIterator<'a, D> where D: AtgDialect, {
                         return Some(("", false));
                     };
                     if D::PUNCTUATION.contains(start_char) {
-                        return Some((&self.original[start_idx..start_idx + start_char.len_utf8()], true));
+                        return Some((
+                            &self.original[start_idx..start_idx + start_char.len_utf8()],
+                            true,
+                        ));
                     };
                     while let Some((next_idx, next_char)) = self.characters.next() {
                         if next_char == D::WORD_DIVISOR {
@@ -60,12 +70,12 @@ impl<'a, D> Iterator for WordSplitIterator<'a, D> where D: AtgDialect, {
                             self.last_char_was_punctuation = Some(next_idx);
                             return Some((&self.original[start_idx..next_idx], true));
                         };
-                    };
+                    }
                     Some((&self.original[start_idx..], false))
                 } else {
                     None
                 }
-            },
+            }
             Some(x) => {
                 let res = Some((&self.original[x..=x], true));
                 self.last_char_was_punctuation = None;
@@ -76,11 +86,11 @@ impl<'a, D> Iterator for WordSplitIterator<'a, D> where D: AtgDialect, {
 }
 /// Given a raw stream in the natural language, split it along words.
 fn split_native_stream<D>(s: &str) -> WordSplitIterator<D>
-where D: AtgDialect,
+where
+    D: AtgDialect,
 {
     WordSplitIterator::<D>::new(s)
 }
-
 
 impl UniqueText {
     /// Split a [UniqueText] into words, adding anchor positions
@@ -186,7 +196,6 @@ pub struct AnchoredNormalisedText {
     pub anchor_positions: Vec<(Anchor, usize)>,
 }
 
-
 impl UniqueSurfacePart {
     /// Split a single ATG Part into its constituent words, without flattening [Uncertain] or
     /// [Correction]
@@ -200,7 +209,9 @@ impl UniqueSurfacePart {
         match self {
             Self::Native(x) => {
                 // literally split along word divisors, spit out a list of Native
-                'word: for (idx, (word, word_definitely_closed)) in split_native_stream::<D>(&x).enumerate() {
+                'word: for (idx, (word, word_definitely_closed)) in
+                    split_native_stream::<D>(&x).enumerate()
+                {
                     right_boundary_divides = Some(word_definitely_closed);
                     if word.is_empty() {
                         if idx == 0 {
@@ -235,7 +246,9 @@ impl UniqueSurfacePart {
                     }
                     Some(prop) => {
                         // similar to native
-                        'word: for (idx, (word, word_definitely_closed)) in split_native_stream::<D>(&prop).enumerate() {
+                        'word: for (idx, (word, word_definitely_closed)) in
+                            split_native_stream::<D>(&prop).enumerate()
+                        {
                             right_boundary_divides = Some(word_definitely_closed);
                             if word.len() < 1 {
                                 if idx == 0 {
@@ -278,7 +291,9 @@ impl UniqueSurfacePart {
                     }
                     Some(prop) => {
                         // similar to native
-                        'word: for (idx, (word, word_definitely_closed)) in split_native_stream::<D>(&prop).enumerate() {
+                        'word: for (idx, (word, word_definitely_closed)) in
+                            split_native_stream::<D>(&prop).enumerate()
+                        {
                             right_boundary_divides = Some(word_definitely_closed);
                             if word.len() < 1 {
                                 if idx == 0 {
@@ -315,11 +330,14 @@ mod test {
     #[test]
     #[cfg(feature = "anchor_example")]
     fn word_split_atg() {
-        use crate::{anchor::AnchorDialect, atg::{dialect::ExampleAtgDialect, normalize::UniqueText, Text}};
+        use crate::{
+            anchor::AnchorDialect,
+            atg::{dialect::ExampleAtgDialect, normalize::UniqueText, Text},
+        };
 
         let input = "This ^(1)(i)s /(line)so~(4)()ext.";
         let parsed = Text::parse::<ExampleAtgDialect>(input, AnchorDialect::Example, 1).unwrap();
-        let uniques: Vec<UniqueText>  = parsed.into();
+        let uniques: Vec<UniqueText> = parsed.into();
         assert_eq!(uniques.len(), 1);
         let words_split = uniques
             .into_iter()

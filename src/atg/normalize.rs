@@ -15,7 +15,7 @@ mod tokenize;
 pub use tokenize::AnchoredNormalisedText;
 /// Take tokenized ATG, supply with the proposed data
 mod specialize;
-pub use specialize::{NormalisedAtgBlock, NonAgnosticAnchoredText, WordNormalForm};
+pub use specialize::{NonAgnosticAnchoredText, NormalisedAtgBlock, WordNormalForm};
 
 /// Like [Part]. but
 /// - No [Correction]s
@@ -44,85 +44,104 @@ impl Word {
     }
 }
 
-
 #[cfg(test)]
-mod test{
-    use crate::{anchor::AnchorDialect, atg::{dialect::ExampleAtgDialect, normalize::{AnchoredNormalisedText, UniqueSurfacePart, Word}, Text}};
+mod test {
+    use crate::{
+        anchor::AnchorDialect,
+        atg::{
+            dialect::ExampleAtgDialect,
+            normalize::{AnchoredNormalisedText, UniqueSurfacePart, Word},
+            Text,
+        },
+    };
 
     #[test]
     #[cfg(feature = "anchor_example")]
     fn split_word_simple() {
         let input = " A B";
         let parsed = Text::parse::<ExampleAtgDialect>(input, AnchorDialect::Example, 0).unwrap();
-        let normalised = parsed.auto_normalise::<ExampleAtgDialect>().collect::<Vec<_>>();
+        let normalised = parsed
+            .auto_normalise::<ExampleAtgDialect>()
+            .collect::<Vec<_>>();
         let normalised = normalised.get(0).unwrap();
         let res = AnchoredNormalisedText {
             text: vec![
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native("A".to_owned()) ],
-                },
-                "A".to_owned(),
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native("A".to_owned())],
+                    },
+                    "A".to_owned(),
                 ),
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native("B".to_owned()) ],
-                },
-                "B".to_owned(),
-                )
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native("B".to_owned())],
+                    },
+                    "B".to_owned(),
+                ),
             ],
             anchor_positions: vec![],
         };
         assert_eq!(*normalised, res);
     }
 
-
     #[test]
     #[cfg(feature = "anchor_example")]
     fn split_words_complicated() {
         let input = "A sentence. Another, sentence.without";
         let parsed = Text::parse::<ExampleAtgDialect>(input, AnchorDialect::Example, 0).unwrap();
-        let normalised = parsed.auto_normalise::<ExampleAtgDialect>().collect::<Vec<_>>();
+        let normalised = parsed
+            .auto_normalise::<ExampleAtgDialect>()
+            .collect::<Vec<_>>();
         let normalised = normalised.get(0).unwrap();
         let res = AnchoredNormalisedText {
             text: vec![
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native("A".to_owned()) ],
-                },
-                "A".to_owned(),
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native("A".to_owned())],
+                    },
+                    "A".to_owned(),
                 ),
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native("sentence".to_owned()) ],
-                },
-                "sentence".to_owned(),
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native("sentence".to_owned())],
+                    },
+                    "sentence".to_owned(),
                 ),
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native(".".to_owned()) ],
-                },
-                ".".to_owned(),
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native(".".to_owned())],
+                    },
+                    ".".to_owned(),
                 ),
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native("Another".to_owned()) ],
-                },
-                "Another".to_owned(),
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native("Another".to_owned())],
+                    },
+                    "Another".to_owned(),
                 ),
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native(",".to_owned()) ],
-                },
-                ",".to_owned(),
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native(",".to_owned())],
+                    },
+                    ",".to_owned(),
                 ),
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native("sentence".to_owned()) ],
-                },
-                "sentence".to_owned(),
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native("sentence".to_owned())],
+                    },
+                    "sentence".to_owned(),
                 ),
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native(".".to_owned()) ],
-                },
-                ".".to_owned(),
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native(".".to_owned())],
+                    },
+                    ".".to_owned(),
                 ),
-                (Word {
-                    parts: vec![ UniqueSurfacePart::Native("without".to_owned()) ],
-                },
-                "without".to_owned(),
+                (
+                    Word {
+                        parts: vec![UniqueSurfacePart::Native("without".to_owned())],
+                    },
+                    "without".to_owned(),
                 ),
             ],
             anchor_positions: vec![],

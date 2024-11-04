@@ -1,7 +1,6 @@
 //! Defines the LexSchema and relevant associated types
 //! TODO: better docs
 
-
 /// Implementors are types, the instances of which are unique Lexeme-IDs
 ///
 /// An instance of an implementing Type MUST be a unique (for its type) ID that can be used to
@@ -24,7 +23,6 @@ pub trait LexSchema:
     const NAME: &'static str;
 }
 
-
 #[derive(Debug)]
 pub struct LexParseError {
     location: usize,
@@ -45,4 +43,3 @@ impl core::fmt::Display for LexParseError {
     }
 }
 impl std::error::Error for LexParseError {}
-

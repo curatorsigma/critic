@@ -2,7 +2,14 @@
 
 use std::str::FromStr;
 
-use crate::{atg::normalize::{AnchoredNormalisedText, NonAgnosticAnchoredText, WordNormalForm}, language::{lex::{LexParseError, LexSchema}, morph::{MorphPointParseError, MorphRangeParseError}, MorphPointSchema, MorphRangeSchema, SuperLanguage}};
+use crate::{
+    atg::normalize::{AnchoredNormalisedText, NonAgnosticAnchoredText, WordNormalForm},
+    language::{
+        lex::{LexParseError, LexSchema},
+        morph::{MorphPointParseError, MorphRangeParseError},
+        MorphPointSchema, MorphRangeSchema, SuperLanguage,
+    },
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ExampleLex {
@@ -124,8 +131,9 @@ mod test {
         let parsed =
             Text::parse::<ExampleAtgDialect>(input, crate::anchor::AnchorDialect::Example, 2)
                 .unwrap();
-        let normalised = parsed.auto_normalise::<ExampleAtgDialect>().collect::<Vec<_>>();
+        let normalised = parsed
+            .auto_normalise::<ExampleAtgDialect>()
+            .collect::<Vec<_>>();
         assert_eq!(normalised.len(), 2);
     }
 }
-

@@ -2,7 +2,16 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::{anchor::AnchorDialect, atg::{dialect::{parse_by_dialect, AtgDialectList, AtgDialectUnknown}, normalize::NormalisedAtgBlock, AtgBlock}, define::WitnessMetadata, language::Language};
+use crate::{
+    anchor::AnchorDialect,
+    atg::{
+        dialect::{parse_by_dialect, AtgDialectList, AtgDialectUnknown},
+        normalize::NormalisedAtgBlock,
+        AtgBlock,
+    },
+    define::WitnessMetadata,
+    language::Language,
+};
 
 use self::io::{FolioTranscriptParseError, FolioTranscriptParseErrorReason};
 
@@ -73,11 +82,12 @@ impl TranscriptBlock {
             },
             Some(x) => x,
         };
-        let language =
-            crate::language::Language::from_name(language).ok_or(FolioTranscriptParseError::new(
+        let language = crate::language::Language::from_name(language).ok_or(
+            FolioTranscriptParseError::new(
                 FolioTranscriptParseErrorReason::LanguageUnknown(language.to_owned()),
                 None,
-            ))?;
+            ),
+        )?;
 
         let anchor = match &self.anchor {
             None => match &meta.default_anchor() {
@@ -91,16 +101,14 @@ impl TranscriptBlock {
             },
             Some(x) => x,
         };
-        let anchor_dialect = AnchorDialect::get_by_name(anchor).ok_or(
-            FolioTranscriptParseError::new(
+        let anchor_dialect =
+            AnchorDialect::get_by_name(anchor).ok_or(FolioTranscriptParseError::new(
                 FolioTranscriptParseErrorReason::AnchorDialectUnknown(anchor.to_owned()),
                 None,
-            ),
-        )?;
+            ))?;
         Ok((atg.to_owned(), language, anchor_dialect))
     }
 }
-
 
 /// A transcript of a single folio.
 #[derive(Deserialize, Debug, PartialEq, Eq)]
@@ -134,10 +142,12 @@ impl FolioTranscript {
                 metadata = value.try_into()?;
             } else {
                 // check that key is a digit
-                let num = key.parse::<u8>().map_err(|_| FolioTranscriptParseError::new(
-                    FolioTranscriptParseErrorReason::BlockNameNotDecimal(key.clone()),
-                    None,
-                ))?;
+                let num = key.parse::<u8>().map_err(|_| {
+                    FolioTranscriptParseError::new(
+                        FolioTranscriptParseErrorReason::BlockNameNotDecimal(key.clone()),
+                        None,
+                    )
+                })?;
                 // The blocks are sorted in lexical order (by [toml]).
                 // We need to make sure the names were actually given in ascending order.
                 if num as usize != blocks.len() + 1 {
@@ -151,25 +161,28 @@ impl FolioTranscript {
                     trans_block.select_dialects(&witness_metadata)?;
                 let atg_dialect =
                     atg.parse::<AtgDialectList>()
-                        .map_err(|AtgDialectUnknown { name: x }| FolioTranscriptParseError::new(
-                            FolioTranscriptParseErrorReason::AtgDialectUnknown(x),
-                            None,
-                        ))?;
+                        .map_err(|AtgDialectUnknown { name: x }| {
+                            FolioTranscriptParseError::new(
+                                FolioTranscriptParseErrorReason::AtgDialectUnknown(x),
+                                None,
+                            )
+                        })?;
 
                 let number_of_corrections = witness_metadata.number_of_corrections();
-                let text =
-                    match parse_by_dialect(&trans_block.transcript, &atg_dialect, anchor_dialect, number_of_corrections) {
-                        Err(parse_error) => {
-                            return Err(FolioTranscriptParseError::new(
-                                FolioTranscriptParseErrorReason::TranscriptUnparsable(
-                                    key,
-                                    parse_error,
-                                ),
-                                None,
-                            ));
-                        }
-                        Ok(x) => x,
-                    };
+                let text = match parse_by_dialect(
+                    &trans_block.transcript,
+                    &atg_dialect,
+                    anchor_dialect,
+                    number_of_corrections,
+                ) {
+                    Err(parse_error) => {
+                        return Err(FolioTranscriptParseError::new(
+                            FolioTranscriptParseErrorReason::TranscriptUnparsable(key, parse_error),
+                            None,
+                        ));
+                    }
+                    Ok(x) => x,
+                };
                 blocks.push(AtgBlock::new(text, language, atg_dialect));
             };
         }
@@ -184,8 +197,7 @@ impl FolioTranscript {
 
     /// Normalise all AtgBlocks in this Folio, creating a Vector over the different
     /// Corrections contained within.
-    pub fn normalise(self) -> Vec<NormalisedFolioTranscript>
-    {
+    pub fn normalise(self) -> Vec<NormalisedFolioTranscript> {
         let metadata = self.metadata;
         // this is
         // - a vec over blocks
@@ -220,7 +232,6 @@ impl FolioTranscript {
     }
 }
 
-
 /// A transcribed Folio, with the text completely normalized
 #[derive(Debug)]
 pub struct NormalisedFolioTranscript {
@@ -240,8 +251,7 @@ impl NormalisedFolioTranscript {
         // render the other blocks
         for (idx, block) in self.blocks.iter().enumerate() {
             res.push_str(&block.render_for_lex_file(idx + 1));
-        };
+        }
         res
     }
 }
-

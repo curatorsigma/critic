@@ -22,4 +22,3 @@ impl AtgDialect for ExampleAtgDialect {
     const ATG_CONTROL_POINTS: ControlPointDefinition = EXAMPLE_CONTROL_POINTS;
     const WORD_DIVISOR: char = ' ';
 }
-

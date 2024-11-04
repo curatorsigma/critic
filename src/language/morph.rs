@@ -109,4 +109,3 @@ pub trait MorphRangeSchema:
     /// true iff `p` is contained in [`self`]
     fn contains(&self, p: &Self::Point) -> bool;
 }
-

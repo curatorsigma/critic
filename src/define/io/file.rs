@@ -40,4 +40,3 @@ pub fn read_witness_metadata(path: &Path) -> Result<WitnessMetadata, ReadWitness
         .map_err(|x| ReadWitnessDefinitionError::Io(x, path.to_string_lossy().to_string()))?;
     Ok(toml::from_str(&content)?)
 }
-
